@@ -1,0 +1,49 @@
+{
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
+  },
+  "name": "@anopszetex/ytdownloader",
+  "version": "1.0.0",
+  "description": "Fast CLI for downloading the best media available through yt-dlp.",
+  "bin": {
+    "ytdown": "src/index.js"
+  },
+  "files": [
+    "src/index.js",
+    "src/cli",
+    "src/core",
+    "src/infra"
+  ],
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "biome check . && eslint src test scripts fixtures",
+    "check:fix": "biome check --write .",
+    "test": "node --test",
+    "prepare": "node scripts/install-hooks.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anopszetex/node-ytdownloader.git"
+  },
+  "keywords": [
+    "download",
+    "media",
+    "video",
+    "yt-dlp"
+  ],
+  "author": "",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anopszetex/node-ytdownloader/issues"
+  },
+  "homepage": "https://github.com/anopszetex/node-ytdownloader#readme",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "eslint": "^10.12.0"
+  }
+}

@@ -144,3 +144,10 @@ scripts/files
 database.crt
 
 .clinic/
+
+# Downloaded media
+downloads/
+
+# Authentication cookies
+cookies.txt
+*.cookies.txt
