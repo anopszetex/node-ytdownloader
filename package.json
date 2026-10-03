@@ -1,29 +1,45 @@
 {
   "dependencies": {
-    "@distube/ytdl-core": "^4.16.12",
-    "ffmpeg-static": "^5.2.0",
-    "youtube-dl-exec": "^3.0.24",
-    "yt-dlp-exec": "^1.0.2",
-    "yt-dlp-wrap": "^2.3.12"
+    "ffmpeg-static": "^5.2.0"
   },
   "name": "@anopszetex/ytdownloader",
   "version": "1.0.0",
-  "description": "Baixador de vídeos do YouTube em Node.js com suporte a streams, áudio+vídeo em alta qualidade e integração com FFmpeg.",
-  "main": "index.js",
+  "description": "Fast CLI for downloading the best media available through yt-dlp.",
+  "bin": {
+    "ytdown": "src/index.js"
+  },
+  "files": [
+    "src"
+  ],
   "scripts": {
-    "start": "node src/index.js https://www.youtube.com/watch?v=Fpn1imb9qZg&list=RDFpn1imb9qZg"
+    "start": "node src/index.js",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "test": "node --test",
+    "prepare": "node scripts/install-hooks.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/anopszetex/node-ytdownloader.git"
   },
-  "keywords": [],
+  "keywords": [
+    "download",
+    "media",
+    "video",
+    "yt-dlp"
+  ],
   "author": "",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/anopszetex/node-ytdownloader/issues"
   },
   "homepage": "https://github.com/anopszetex/node-ytdownloader#readme",
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4"
+  }
 }

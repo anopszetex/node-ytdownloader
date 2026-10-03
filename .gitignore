@@ -144,3 +144,6 @@ scripts/files
 database.crt
 
 .clinic/
+
+# Downloaded media
+downloads/
