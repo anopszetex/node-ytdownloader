@@ -16,6 +16,7 @@ describe("parseCliArgs", () => {
         executable: "yt-dlp",
         cookiesFromBrowser: undefined,
         cookiesFile: undefined,
+        verbose: false,
       },
     });
   });
@@ -44,14 +45,15 @@ describe("parseCliArgs", () => {
       executable: "/usr/local/bin/yt-dlp",
       cookiesFromBrowser: "chrome:Default",
       cookiesFile: undefined,
+      verbose: false,
     });
   });
 
   it("requires one URL", () => {
-    assert.throws(() => parseCliArgs([]), /exactly one/);
+    assert.throws(() => parseCliArgs([]), /exatamente uma/);
     assert.throws(
       () => parseCliArgs(["https://example.com/one", "https://example.com/two"]),
-      /exactly one/,
+      /exatamente uma/,
     );
   });
 });

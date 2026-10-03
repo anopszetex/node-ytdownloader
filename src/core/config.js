@@ -14,15 +14,15 @@ function validateRequired(value, message) {
 /** @param {DownloadConfigInput} input */
 function validateCookies(input) {
   if (input.cookiesFromBrowser !== undefined) {
-    validateRequired(input.cookiesFromBrowser, "Browser name cannot be empty.");
+    validateRequired(input.cookiesFromBrowser, "O nome do navegador não pode estar vazio.");
   }
 
   if (input.cookiesFile !== undefined) {
-    validateRequired(input.cookiesFile, "Cookies file cannot be empty.");
+    validateRequired(input.cookiesFile, "O arquivo de cookies não pode estar vazio.");
   }
 
   if (input.cookiesFromBrowser && input.cookiesFile) {
-    throw new TypeError("Use either browser cookies or a cookies file, not both.");
+    throw new TypeError("Use cookies do navegador ou um arquivo de cookies, não ambos.");
   }
 }
 
@@ -35,6 +35,7 @@ function validateCookies(input) {
  * @property {string} executable
  * @property {string | undefined} cookiesFromBrowser
  * @property {string | undefined} cookiesFile
+ * @property {boolean} verbose
  */
 
 /**
@@ -46,6 +47,7 @@ function validateCookies(input) {
  * @property {string} executable
  * @property {string | undefined} cookiesFromBrowser
  * @property {string | undefined} cookiesFile
+ * @property {boolean} verbose
  */
 
 /**
@@ -55,8 +57,8 @@ function validateCookies(input) {
  * @returns {Readonly<DownloadConfig>}
  */
 export function createConfig(input, cwd = process.cwd()) {
-  validateRequired(input.outputDirectory, "Output directory cannot be empty.");
-  validateRequired(input.executable, "yt-dlp executable cannot be empty.");
+  validateRequired(input.outputDirectory, "A pasta de destino não pode estar vazia.");
+  validateRequired(input.executable, "O executável do yt-dlp não pode estar vazio.");
   validateCookies(input);
 
   return Object.freeze({
@@ -67,5 +69,6 @@ export function createConfig(input, cwd = process.cwd()) {
     executable: input.executable,
     cookiesFromBrowser: input.cookiesFromBrowser,
     cookiesFile: input.cookiesFile ? path.resolve(cwd, input.cookiesFile) : undefined,
+    verbose: input.verbose,
   });
 }

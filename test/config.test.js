@@ -10,6 +10,7 @@ const input = {
   executable: "yt-dlp",
   cookiesFromBrowser: undefined,
   cookiesFile: undefined,
+  verbose: false,
 };
 
 describe("createConfig", () => {
@@ -31,9 +32,9 @@ describe("createConfig", () => {
   });
 
   it("rejects invalid quality and concurrency", () => {
-    assert.throws(() => createConfig({ ...input, quality: "4k" }), /Quality/);
-    assert.throws(() => createConfig({ ...input, connections: "0" }), /Connections/);
-    assert.throws(() => createConfig({ ...input, connections: "2.5" }), /Connections/);
+    assert.throws(() => createConfig({ ...input, quality: "4k" }), /qualidade/);
+    assert.throws(() => createConfig({ ...input, connections: "0" }), /conexões/);
+    assert.throws(() => createConfig({ ...input, connections: "2.5" }), /conexões/);
   });
 
   it("accepts only one cookies source", () => {
@@ -44,7 +45,7 @@ describe("createConfig", () => {
           cookiesFromBrowser: "chrome",
           cookiesFile: "cookies.txt",
         }),
-      /either browser cookies or a cookies file/,
+      /não ambos/,
     );
   });
 });

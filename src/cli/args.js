@@ -2,20 +2,21 @@ import { parseArgs } from "node:util";
 
 /** @typedef {import('../core/config.js').DownloadConfigInput} DownloadConfigInput */
 
-const HELP = `Usage: ytdown <url> [options]
+const HELP = `Uso: ytdown <url> [opções]
 
-Download the best available media supported by yt-dlp.
+Baixa a melhor mídia disponível por meio do yt-dlp.
 
-Options:
-  -o, --output <dir>       Destination directory (default: downloads)
-  -q, --quality <value>    best, 720, 1080, 1440, or 2160 (default: best)
-  -N, --connections <n>    Concurrent fragments from 1 to 32 (default: 8)
-      --ytdlp <path>       yt-dlp executable (default: yt-dlp)
+Opções:
+  -o, --output <dir>       Pasta de destino (padrão: downloads)
+  -q, --quality <value>    best, 720, 1080, 1440 ou 2160 (padrão: best)
+  -N, --connections <n>    Fragmentos simultâneos de 1 a 32 (padrão: 8)
+      --ytdlp <path>       Executável do yt-dlp (padrão: yt-dlp)
       --cookies-from-browser <browser>
-                           Read cookies from a browser, such as chrome or firefox
-      --cookies <file>     Read cookies from a Netscape-format file
-  -h, --help               Show help
-  -v, --version            Show version`;
+                           Lê cookies de um navegador, como chrome ou firefox
+      --cookies <file>     Lê cookies de um arquivo no formato Netscape
+      --verbose            Exibe os logs técnicos do yt-dlp
+  -h, --help               Exibe ajuda
+  -v, --version            Exibe a versão`;
 
 /**
  * Parse command-line arguments without performing I/O.
@@ -34,6 +35,7 @@ export function parseCliArgs(args) {
       ytdlp: { type: "string", default: "yt-dlp" },
       "cookies-from-browser": { type: "string" },
       cookies: { type: "string" },
+      verbose: { type: "boolean", default: false },
       help: { type: "boolean", short: "h" },
       version: { type: "boolean", short: "v" },
     },
@@ -48,7 +50,7 @@ export function parseCliArgs(args) {
   }
 
   if (positionals.length !== 1) {
-    throw new TypeError("Provide exactly one media URL.");
+    throw new TypeError("Informe exatamente uma URL de mídia.");
   }
 
   return {
@@ -61,6 +63,7 @@ export function parseCliArgs(args) {
       executable: values.ytdlp,
       cookiesFromBrowser: values["cookies-from-browser"],
       cookiesFile: values.cookies,
+      verbose: values.verbose,
     },
   };
 }

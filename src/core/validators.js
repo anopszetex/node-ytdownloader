@@ -6,11 +6,11 @@ export function validateUrl(value) {
   try {
     url = new URL(value);
   } catch {
-    throw new TypeError("URL must be valid.");
+    throw new TypeError("A URL deve ser válida.");
   }
 
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new TypeError("URL must use HTTP or HTTPS.");
+    throw new TypeError("A URL deve usar HTTP ou HTTPS.");
   }
   return url.href;
 }
@@ -23,7 +23,7 @@ export function validateQuality(value) {
 
   const quality = Number(value);
   if (!QUALITY_VALUES.has(quality)) {
-    throw new TypeError("Quality must be best, 720, 1080, 1440, or 2160.");
+    throw new TypeError("A qualidade deve ser best, 720, 1080, 1440 ou 2160.");
   }
   return /** @type {720 | 1080 | 1440 | 2160} */ (quality);
 }
@@ -32,7 +32,7 @@ export function validateQuality(value) {
 export function validateConnections(value) {
   const connections = Number(value);
   if (!Number.isInteger(connections) || connections < 1 || connections > 32) {
-    throw new TypeError("Connections must be an integer from 1 to 32.");
+    throw new TypeError("O número de conexões deve ser um inteiro de 1 a 32.");
   }
   return connections;
 }

@@ -156,11 +156,16 @@ export function createProgressReporter(options = {}) {
     writeLine(`  Arquivo: ${event.path}`);
   };
 
+  const renderFailed = () => {
+    clearProgress();
+  };
+
   const renderers = Object.freeze({
     start: renderStart,
     progress: renderProgress,
     processing: renderProcessing,
     complete: renderComplete,
+    failed: renderFailed,
   });
 
   return (event) => {

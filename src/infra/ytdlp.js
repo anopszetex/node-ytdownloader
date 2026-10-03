@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import { createInterface } from "node:readline";
 import ffmpegPath from "ffmpeg-static";
+import { classifyDownloadFailure } from "../core/download-errors.js";
 import {
   DOWNLOAD_COMPLETE_TEMPLATE,
   DOWNLOAD_PROCESSING_TEMPLATE,
@@ -17,18 +18,50 @@ import { selectFormat } from "../core/formats.js";
 /**
  * @param {NodeJS.ReadableStream} stream
  * @param {(event: object) => void} onEvent
+ * @param {(message: string) => void} onDiagnostic
  */
-function observeEvents(stream, onEvent) {
+function observeEvents(stream, onEvent, onDiagnostic) {
   const lines = createInterface({ input: stream });
 
   lines.on("line", (line) => {
     const event = parseDownloadEvent(line);
 
     if (!event) {
+      onDiagnostic(line);
       return;
     }
 
     onEvent(event);
+  });
+}
+
+/**
+ * @param {string[]} args
+ * @param {boolean} verbose
+ */
+function addLoggingArgs(args, verbose) {
+  if (verbose) {
+    args.push("--verbose");
+    return;
+  }
+
+  args.push("--quiet", "--no-warnings");
+}
+
+/** @param {unknown} cause */
+function createSpawnError(cause, executable) {
+  const errorCode = /** @type {NodeJS.ErrnoException} */ (cause).code;
+
+  if (errorCode === "ENOENT") {
+    return new DownloadError(`Executável não encontrado: ${executable}`, {
+      code: "NOT_FOUND",
+      cause,
+    });
+  }
+
+  return new DownloadError("Não foi possível iniciar o yt-dlp.", {
+    code: "EXIT_FAILED",
+    cause,
   });
 }
 
@@ -41,8 +74,6 @@ export function buildYtdlpArgs(config) {
     "--no-playlist",
     "--continue",
     "--no-overwrites",
-    "--quiet",
-    "--no-warnings",
     "--progress",
     "--newline",
     "--progress-delta",
@@ -65,6 +96,8 @@ export function buildYtdlpArgs(config) {
     "%(title).200B [%(id)s].%(ext)s",
   ];
 
+  addLoggingArgs(args, config.verbose);
+
   if (ffmpegPath) {
     args.push("--ffmpeg-location", ffmpegPath);
   }
@@ -83,7 +116,7 @@ export function buildYtdlpArgs(config) {
 /**
  * Download directly through yt-dlp, avoiding media copies in the Node process.
  * @param {Readonly<DownloadConfig>} config
- * @param {{ signal?: AbortSignal, onEvent?: (event: object) => void }} [options]
+ * @param {{ signal?: AbortSignal, onEvent?: (event: object) => void, onDiagnostic?: (message: string) => void }} [options]
  */
 export async function download(config, options = {}) {
   await mkdir(config.outputDirectory, { recursive: true });
@@ -94,11 +127,16 @@ export async function download(config, options = {}) {
       windowsHide: true,
     });
     let settled = false;
+    let diagnostics = "";
 
     const onEvent = options.onEvent ?? (() => {});
+    const onDiagnostic = (message) => {
+      diagnostics = `${diagnostics}\n${message}`.slice(-32_768);
+      options.onDiagnostic?.(message);
+    };
 
-    observeEvents(child.stdout, onEvent);
-    observeEvents(child.stderr, onEvent);
+    observeEvents(child.stdout, onEvent, onDiagnostic);
+    observeEvents(child.stderr, onEvent, onDiagnostic);
 
     const cleanup = () => options.signal?.removeEventListener("abort", abort);
     const finish = (callback) => {
@@ -121,20 +159,16 @@ export async function download(config, options = {}) {
     }
 
     child.once("error", (cause) => {
-      const notFound = /** @type {NodeJS.ErrnoException} */ (cause).code === "ENOENT";
-      finish(() =>
-        reject(
-          new DownloadError(
-            notFound ? `Executable not found: ${config.executable}` : "Could not start yt-dlp.",
-            { code: notFound ? "NOT_FOUND" : "EXIT_FAILED", cause },
-          ),
-        ),
-      );
+      finish(() => {
+        onEvent({ type: "failed" });
+        reject(createSpawnError(cause, config.executable));
+      });
     });
 
     child.once("close", (code, signal) => {
       finish(() => {
         if (options.signal?.aborted) {
+          onEvent({ type: "failed" });
           reject(new DownloadError("Download cancelled.", { code: "ABORTED" }));
           return;
         }
@@ -144,11 +178,10 @@ export async function download(config, options = {}) {
           return;
         }
 
-        reject(
-          new DownloadError(`yt-dlp failed (${signal ?? `exit ${code ?? "unknown"}`}).`, {
-            code: "EXIT_FAILED",
-          }),
-        );
+        const failure = classifyDownloadFailure(diagnostics, code);
+
+        onEvent({ type: "failed" });
+        reject(new DownloadError(failure.message, { code: failure.code, cause: signal }));
       });
     });
   });

@@ -18,6 +18,7 @@ describe("yt-dlp command", () => {
       executable: "yt-dlp",
       cookiesFromBrowser: undefined,
       cookiesFile: undefined,
+      verbose: false,
     });
 
     assert.ok(args.includes("--paths"));
@@ -40,6 +41,7 @@ describe("yt-dlp command", () => {
       executable: "yt-dlp",
       cookiesFromBrowser: "firefox",
       cookiesFile: undefined,
+      verbose: false,
     });
 
     assert.deepEqual(args.slice(-3), [
