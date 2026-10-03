@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "start": "node src/index.js",
-    "check": "biome check . && eslint src test scripts",
+    "check": "biome check . && eslint src test scripts fixtures",
     "check:fix": "biome check --write .",
     "test": "node --test",
     "prepare": "node scripts/install-hooks.js"

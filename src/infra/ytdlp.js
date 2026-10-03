@@ -35,6 +35,45 @@ function observeEvents(stream, onEvent, onDiagnostic) {
   });
 }
 
+/** @param {(event: object) => void} onEvent */
+function createEventRouter(onEvent) {
+  let started = false;
+  let completionEvent;
+  let pendingEvents = [];
+
+  const route = (event) => {
+    if (event.type === "complete") {
+      completionEvent = event;
+      return;
+    }
+
+    if (event.type === "start") {
+      started = true;
+      onEvent(event);
+      pendingEvents.forEach(onEvent);
+      pendingEvents = [];
+      return;
+    }
+
+    if (!started) {
+      pendingEvents.push(event);
+      return;
+    }
+
+    onEvent(event);
+  };
+
+  const complete = () => {
+    pendingEvents.forEach(onEvent);
+
+    if (completionEvent) {
+      onEvent(completionEvent);
+    }
+  };
+
+  return Object.freeze({ route, complete });
+}
+
 /**
  * @param {string[]} args
  * @param {boolean} verbose
@@ -130,13 +169,14 @@ export async function download(config, options = {}) {
     let diagnostics = "";
 
     const onEvent = options.onEvent ?? (() => {});
+    const eventRouter = createEventRouter(onEvent);
     const onDiagnostic = (message) => {
       diagnostics = `${diagnostics}\n${message}`.slice(-32_768);
       options.onDiagnostic?.(message);
     };
 
-    observeEvents(child.stdout, onEvent, onDiagnostic);
-    observeEvents(child.stderr, onEvent, onDiagnostic);
+    observeEvents(child.stdout, eventRouter.route, onDiagnostic);
+    observeEvents(child.stderr, eventRouter.route, onDiagnostic);
 
     const cleanup = () => options.signal?.removeEventListener("abort", abort);
     const finish = (callback) => {
@@ -174,6 +214,7 @@ export async function download(config, options = {}) {
         }
 
         if (code === 0) {
+          eventRouter.complete();
           resolve();
           return;
         }

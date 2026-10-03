@@ -36,7 +36,7 @@ Por padrão, a mídia é salva em `./downloads` com a melhor qualidade disponív
 ```sh
 ytdown <url> [options]
 
-Options:
+Opções:
   -o, --output <dir>       Pasta de destino
   -q, --quality <value>    best, 720, 1080, 1440 ou 2160
   -N, --connections <n>    Fragmentos simultâneos, de 1 a 32
@@ -44,6 +44,7 @@ Options:
       --cookies-from-browser <browser>
                            Usa cookies de um navegador
       --cookies <file>     Usa um arquivo de cookies no formato Netscape
+      --verbose            Exibe os logs técnicos do yt-dlp
   -h, --help               Exibe ajuda
   -v, --version            Exibe a versão
 ```
@@ -54,7 +55,13 @@ Exemplo:
 ytdown "https://example.com/video" --output ~/Videos --quality 2160 --connections 16
 ```
 
-Durante o download, o `yt-dlp` exibe sua barra de progresso nativa no terminal.
+Durante o download, a CLI apresenta título, percentual, velocidade e tempo
+estimado em português. Em terminais interativos, a barra é atualizada na mesma
+linha. Em pipelines e CI, o progresso é emitido em intervalos de 10% sem códigos
+ANSI.
+
+Os logs técnicos do `yt-dlp` ficam ocultos normalmente. Para investigar uma
+falha, execute novamente com `--verbose`.
 
 `--connections` acelera apenas mídias fragmentadas e depende dos limites do
 servidor e da conexão. Mais conexões nem sempre significam mais velocidade.

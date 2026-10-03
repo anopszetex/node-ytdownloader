@@ -1,6 +1,6 @@
 export default [
   {
-    files: ["src/**/*.js", "test/**/*.js", "scripts/**/*.js"],
+    files: ["src/**/*.js", "test/**/*.js", "scripts/**/*.js", "fixtures/**/*.js"],
     rules: {
       complexity: ["error", 8],
       curly: ["error", "all"],
