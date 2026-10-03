@@ -41,6 +41,9 @@ Options:
   -q, --quality <value>    best, 720, 1080, 1440 ou 2160
   -N, --connections <n>    Fragmentos simultâneos, de 1 a 32
       --ytdlp <path>       Caminho do executável yt-dlp
+      --cookies-from-browser <browser>
+                           Usa cookies de um navegador
+      --cookies <file>     Usa um arquivo de cookies no formato Netscape
   -h, --help               Exibe ajuda
   -v, --version            Exibe a versão
 ```
@@ -51,8 +54,35 @@ Exemplo:
 ytdown "https://example.com/video" --output ~/Videos --quality 2160 --connections 16
 ```
 
+Durante o download, o `yt-dlp` exibe sua barra de progresso nativa no terminal.
+
 `--connections` acelera apenas mídias fragmentadas e depende dos limites do
 servidor e da conexão. Mais conexões nem sempre significam mais velocidade.
+
+### YouTube solicitando login
+
+Se o YouTube responder com `Sign in to confirm you’re not a bot`, reutilize os
+cookies de um navegador no qual você já esteja autenticado:
+
+```sh
+npm start -- "https://youtu.be/rWKE-mhpzOs?list=RDrWKE-mhpzOs" --cookies-from-browser chrome
+```
+
+Também funciona com o comando instalado:
+
+```sh
+ytdown "https://youtu.be/rWKE-mhpzOs" --cookies-from-browser firefox
+```
+
+Para um perfil específico, use a sintaxe aceita pelo `yt-dlp`, como
+`chrome:Default`. Alternativamente, forneça um arquivo:
+
+```sh
+ytdown "<url>" --cookies ~/cookies.txt
+```
+
+Não adicione arquivos de cookies ao Git nem compartilhe esses arquivos. Eles
+podem conceder acesso à sua conta.
 
 ## Desenvolvimento
 

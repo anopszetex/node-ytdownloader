@@ -11,6 +11,9 @@ Options:
   -q, --quality <value>    best, 720, 1080, 1440, or 2160 (default: best)
   -N, --connections <n>    Concurrent fragments from 1 to 32 (default: 8)
       --ytdlp <path>       yt-dlp executable (default: yt-dlp)
+      --cookies-from-browser <browser>
+                           Read cookies from a browser, such as chrome or firefox
+      --cookies <file>     Read cookies from a Netscape-format file
   -h, --help               Show help
   -v, --version            Show version`;
 
@@ -29,6 +32,8 @@ export function parseCliArgs(args) {
       quality: { type: "string", short: "q", default: "best" },
       connections: { type: "string", short: "N", default: "8" },
       ytdlp: { type: "string", default: "yt-dlp" },
+      "cookies-from-browser": { type: "string" },
+      cookies: { type: "string" },
       help: { type: "boolean", short: "h" },
       version: { type: "boolean", short: "v" },
     },
@@ -48,6 +53,8 @@ export function parseCliArgs(args) {
       quality: values.quality,
       connections: values.connections,
       executable: values.ytdlp,
+      cookiesFromBrowser: values["cookies-from-browser"],
+      cookiesFile: values.cookies,
     },
   };
 }

@@ -14,6 +14,8 @@ describe("parseCliArgs", () => {
         quality: "best",
         connections: "8",
         executable: "yt-dlp",
+        cookiesFromBrowser: undefined,
+        cookiesFile: undefined,
       },
     });
   });
@@ -28,6 +30,8 @@ describe("parseCliArgs", () => {
       "16",
       "--ytdlp",
       "/usr/local/bin/yt-dlp",
+      "--cookies-from-browser",
+      "chrome:Default",
       "https://example.com/video",
     ]);
 
@@ -38,6 +42,8 @@ describe("parseCliArgs", () => {
       quality: "1080",
       connections: "16",
       executable: "/usr/local/bin/yt-dlp",
+      cookiesFromBrowser: "chrome:Default",
+      cookiesFile: undefined,
     });
   });
 

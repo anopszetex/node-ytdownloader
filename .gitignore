@@ -147,3 +147,7 @@ database.crt
 
 # Downloaded media
 downloads/
+
+# Authentication cookies
+cookies.txt
+*.cookies.txt

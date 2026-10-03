@@ -16,6 +16,8 @@ describe("yt-dlp command", () => {
       quality: "best",
       connections: 8,
       executable: "yt-dlp",
+      cookiesFromBrowser: undefined,
+      cookiesFile: undefined,
     });
 
     assert.ok(args.includes("--paths"));
@@ -23,5 +25,24 @@ describe("yt-dlp command", () => {
     assert.ok(args.includes("--concurrent-fragments"));
     assert.equal(args.at(-1), "https://example.com/video");
     assert.equal(args.includes("--exec"), false);
+    assert.equal(args.includes("--newline"), false);
+  });
+
+  it("passes browser cookies without exposing their contents", () => {
+    const args = buildYtdlpArgs({
+      url: "https://example.com/video",
+      outputDirectory: "/tmp/downloads",
+      quality: "best",
+      connections: 8,
+      executable: "yt-dlp",
+      cookiesFromBrowser: "firefox",
+      cookiesFile: undefined,
+    });
+
+    assert.deepEqual(args.slice(-3), [
+      "--cookies-from-browser",
+      "firefox",
+      "https://example.com/video",
+    ]);
   });
 });

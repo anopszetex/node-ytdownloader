@@ -8,6 +8,8 @@ const input = {
   quality: "best",
   connections: "8",
   executable: "yt-dlp",
+  cookiesFromBrowser: undefined,
+  cookiesFile: undefined,
 };
 
 describe("createConfig", () => {
@@ -32,5 +34,17 @@ describe("createConfig", () => {
     assert.throws(() => createConfig({ ...input, quality: "4k" }), /Quality/);
     assert.throws(() => createConfig({ ...input, connections: "0" }), /Connections/);
     assert.throws(() => createConfig({ ...input, connections: "2.5" }), /Connections/);
+  });
+
+  it("accepts only one cookies source", () => {
+    assert.throws(
+      () =>
+        createConfig({
+          ...input,
+          cookiesFromBrowser: "chrome",
+          cookiesFile: "cookies.txt",
+        }),
+      /either browser cookies or a cookies file/,
+    );
   });
 });

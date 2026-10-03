@@ -15,7 +15,6 @@ export function buildYtdlpArgs(config) {
     "--no-playlist",
     "--continue",
     "--no-overwrites",
-    "--newline",
     "--concurrent-fragments",
     String(config.connections),
     "--format",
@@ -27,6 +26,10 @@ export function buildYtdlpArgs(config) {
   ];
 
   if (ffmpegPath) args.push("--ffmpeg-location", ffmpegPath);
+  if (config.cookiesFromBrowser) {
+    args.push("--cookies-from-browser", config.cookiesFromBrowser);
+  }
+  if (config.cookiesFile) args.push("--cookies", config.cookiesFile);
   return [...args, config.url];
 }
 

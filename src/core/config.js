@@ -8,6 +8,8 @@ import { validateConnections, validateQuality, validateUrl } from "./validators.
  * @property {string} quality
  * @property {string} connections
  * @property {string} executable
+ * @property {string | undefined} cookiesFromBrowser
+ * @property {string | undefined} cookiesFile
  */
 
 /**
@@ -17,6 +19,8 @@ import { validateConnections, validateQuality, validateUrl } from "./validators.
  * @property {'best' | 720 | 1080 | 1440 | 2160} quality
  * @property {number} connections
  * @property {string} executable
+ * @property {string | undefined} cookiesFromBrowser
+ * @property {string | undefined} cookiesFile
  */
 
 /**
@@ -32,6 +36,15 @@ export function createConfig(input, cwd = process.cwd()) {
   if (!input.executable.trim()) {
     throw new TypeError("yt-dlp executable cannot be empty.");
   }
+  if (input.cookiesFromBrowser !== undefined && !input.cookiesFromBrowser.trim()) {
+    throw new TypeError("Browser name cannot be empty.");
+  }
+  if (input.cookiesFile !== undefined && !input.cookiesFile.trim()) {
+    throw new TypeError("Cookies file cannot be empty.");
+  }
+  if (input.cookiesFromBrowser && input.cookiesFile) {
+    throw new TypeError("Use either browser cookies or a cookies file, not both.");
+  }
 
   return Object.freeze({
     url: validateUrl(input.url),
@@ -39,5 +52,7 @@ export function createConfig(input, cwd = process.cwd()) {
     quality: validateQuality(input.quality),
     connections: validateConnections(input.connections),
     executable: input.executable,
+    cookiesFromBrowser: input.cookiesFromBrowser,
+    cookiesFile: input.cookiesFile ? path.resolve(cwd, input.cookiesFile) : undefined,
   });
 }
