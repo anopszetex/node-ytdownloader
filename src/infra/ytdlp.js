@@ -1,16 +1,36 @@
 import { spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
+import { createInterface } from "node:readline";
 import ffmpegPath from "ffmpeg-static";
 import {
   DOWNLOAD_COMPLETE_TEMPLATE,
   DOWNLOAD_PROCESSING_TEMPLATE,
   DOWNLOAD_PROGRESS_TEMPLATE,
   DOWNLOAD_START_TEMPLATE,
+  parseDownloadEvent,
 } from "../core/download-events.js";
 import { DownloadError } from "../core/errors.js";
 import { selectFormat } from "../core/formats.js";
 
 /** @typedef {import('../core/config.js').DownloadConfig} DownloadConfig */
+
+/**
+ * @param {NodeJS.ReadableStream} stream
+ * @param {(event: object) => void} onEvent
+ */
+function observeEvents(stream, onEvent) {
+  const lines = createInterface({ input: stream });
+
+  lines.on("line", (line) => {
+    const event = parseDownloadEvent(line);
+
+    if (!event) {
+      return;
+    }
+
+    onEvent(event);
+  });
+}
 
 /**
  * Build arguments separately so command construction stays testable.
@@ -63,17 +83,22 @@ export function buildYtdlpArgs(config) {
 /**
  * Download directly through yt-dlp, avoiding media copies in the Node process.
  * @param {Readonly<DownloadConfig>} config
- * @param {{ signal?: AbortSignal }} [options]
+ * @param {{ signal?: AbortSignal, onEvent?: (event: object) => void }} [options]
  */
 export async function download(config, options = {}) {
   await mkdir(config.outputDirectory, { recursive: true });
 
   return new Promise((resolve, reject) => {
     const child = spawn(config.executable, buildYtdlpArgs(config), {
-      stdio: "inherit",
+      stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
     });
     let settled = false;
+
+    const onEvent = options.onEvent ?? (() => {});
+
+    observeEvents(child.stdout, onEvent);
+    observeEvents(child.stderr, onEvent);
 
     const cleanup = () => options.signal?.removeEventListener("abort", abort);
     const finish = (callback) => {

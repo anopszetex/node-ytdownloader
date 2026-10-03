@@ -4,6 +4,7 @@ import { createConfig } from "../core/config.js";
 import { DownloadError } from "../core/errors.js";
 import { download } from "../infra/ytdlp.js";
 import { getHelp, parseCliArgs } from "./args.js";
+import { createProgressReporter } from "./progress.js";
 
 /** @param {string} message */
 const print = (message) => process.stdout.write(`${message}\n`);
@@ -37,12 +38,17 @@ export async function main(argv = process.argv.slice(2)) {
     const config = createConfig(command.input);
     const controller = new AbortController();
     const abort = () => controller.abort();
+    const reportProgress = createProgressReporter();
+
     process.once("SIGINT", abort);
     process.once("SIGTERM", abort);
 
     try {
-      await download(config, { signal: controller.signal });
-      print(`Saved in ${config.outputDirectory}`);
+      await download(config, {
+        signal: controller.signal,
+        onEvent: reportProgress,
+      });
+
       return 0;
     } finally {
       process.off("SIGINT", abort);
