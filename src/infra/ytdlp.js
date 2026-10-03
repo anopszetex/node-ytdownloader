@@ -1,6 +1,12 @@
 import { spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import ffmpegPath from "ffmpeg-static";
+import {
+  DOWNLOAD_COMPLETE_TEMPLATE,
+  DOWNLOAD_PROCESSING_TEMPLATE,
+  DOWNLOAD_PROGRESS_TEMPLATE,
+  DOWNLOAD_START_TEMPLATE,
+} from "../core/download-events.js";
 import { DownloadError } from "../core/errors.js";
 import { selectFormat } from "../core/formats.js";
 
@@ -15,6 +21,20 @@ export function buildYtdlpArgs(config) {
     "--no-playlist",
     "--continue",
     "--no-overwrites",
+    "--quiet",
+    "--no-warnings",
+    "--progress",
+    "--newline",
+    "--progress-delta",
+    "0.2",
+    "--progress-template",
+    `download:${DOWNLOAD_PROGRESS_TEMPLATE}`,
+    "--progress-template",
+    `postprocess:${DOWNLOAD_PROCESSING_TEMPLATE}`,
+    "--print",
+    `before_dl:${DOWNLOAD_START_TEMPLATE}`,
+    "--print",
+    `after_move:${DOWNLOAD_COMPLETE_TEMPLATE}`,
     "--concurrent-fragments",
     String(config.connections),
     "--format",

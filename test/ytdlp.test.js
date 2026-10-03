@@ -23,9 +23,12 @@ describe("yt-dlp command", () => {
     assert.ok(args.includes("--paths"));
     assert.ok(args.includes("/tmp/downloads"));
     assert.ok(args.includes("--concurrent-fragments"));
+    assert.ok(args.includes("--progress-template"));
+    assert.ok(args.includes("--progress-delta"));
+    assert.ok(args.includes("--quiet"));
     assert.equal(args.at(-1), "https://example.com/video");
     assert.equal(args.includes("--exec"), false);
-    assert.equal(args.includes("--newline"), false);
+    assert.equal(args.includes("--newline"), true);
   });
 
   it("passes browser cookies without exposing their contents", () => {
