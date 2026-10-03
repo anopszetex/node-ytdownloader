@@ -9,7 +9,10 @@
     "ytdown": "src/index.js"
   },
   "files": [
-    "src"
+    "src/index.js",
+    "src/cli",
+    "src/core",
+    "src/infra"
   ],
   "scripts": {
     "start": "node src/index.js",
