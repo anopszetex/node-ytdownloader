@@ -2,6 +2,31 @@ import path from "node:path";
 import { validateConnections, validateQuality, validateUrl } from "./validators.js";
 
 /**
+ * @param {string} value
+ * @param {string} message
+ */
+function validateRequired(value, message) {
+  if (!value.trim()) {
+    throw new TypeError(message);
+  }
+}
+
+/** @param {DownloadConfigInput} input */
+function validateCookies(input) {
+  if (input.cookiesFromBrowser !== undefined) {
+    validateRequired(input.cookiesFromBrowser, "Browser name cannot be empty.");
+  }
+
+  if (input.cookiesFile !== undefined) {
+    validateRequired(input.cookiesFile, "Cookies file cannot be empty.");
+  }
+
+  if (input.cookiesFromBrowser && input.cookiesFile) {
+    throw new TypeError("Use either browser cookies or a cookies file, not both.");
+  }
+}
+
+/**
  * @typedef {object} DownloadConfigInput
  * @property {string} url
  * @property {string} outputDirectory
@@ -30,21 +55,9 @@ import { validateConnections, validateQuality, validateUrl } from "./validators.
  * @returns {Readonly<DownloadConfig>}
  */
 export function createConfig(input, cwd = process.cwd()) {
-  if (!input.outputDirectory.trim()) {
-    throw new TypeError("Output directory cannot be empty.");
-  }
-  if (!input.executable.trim()) {
-    throw new TypeError("yt-dlp executable cannot be empty.");
-  }
-  if (input.cookiesFromBrowser !== undefined && !input.cookiesFromBrowser.trim()) {
-    throw new TypeError("Browser name cannot be empty.");
-  }
-  if (input.cookiesFile !== undefined && !input.cookiesFile.trim()) {
-    throw new TypeError("Cookies file cannot be empty.");
-  }
-  if (input.cookiesFromBrowser && input.cookiesFile) {
-    throw new TypeError("Use either browser cookies or a cookies file, not both.");
-  }
+  validateRequired(input.outputDirectory, "Output directory cannot be empty.");
+  validateRequired(input.executable, "yt-dlp executable cannot be empty.");
+  validateCookies(input);
 
   return Object.freeze({
     url: validateUrl(input.url),

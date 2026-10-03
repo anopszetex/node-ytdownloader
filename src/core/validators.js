@@ -17,7 +17,10 @@ export function validateUrl(value) {
 
 /** @param {string} value */
 export function validateQuality(value) {
-  if (value === "best") return value;
+  if (value === "best") {
+    return value;
+  }
+
   const quality = Number(value);
   if (!QUALITY_VALUES.has(quality)) {
     throw new TypeError("Quality must be best, 720, 1080, 1440, or 2160.");

@@ -39,8 +39,14 @@ export function parseCliArgs(args) {
     },
   });
 
-  if (values.help) return { kind: "help" };
-  if (values.version) return { kind: "version" };
+  if (values.help) {
+    return { kind: "help" };
+  }
+
+  if (values.version) {
+    return { kind: "version" };
+  }
+
   if (positionals.length !== 1) {
     throw new TypeError("Provide exactly one media URL.");
   }

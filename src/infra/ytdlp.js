@@ -25,11 +25,18 @@ export function buildYtdlpArgs(config) {
     "%(title).200B [%(id)s].%(ext)s",
   ];
 
-  if (ffmpegPath) args.push("--ffmpeg-location", ffmpegPath);
+  if (ffmpegPath) {
+    args.push("--ffmpeg-location", ffmpegPath);
+  }
+
   if (config.cookiesFromBrowser) {
     args.push("--cookies-from-browser", config.cookiesFromBrowser);
   }
-  if (config.cookiesFile) args.push("--cookies", config.cookiesFile);
+
+  if (config.cookiesFile) {
+    args.push("--cookies", config.cookiesFile);
+  }
+
   return [...args, config.url];
 }
 
@@ -50,7 +57,10 @@ export async function download(config, options = {}) {
 
     const cleanup = () => options.signal?.removeEventListener("abort", abort);
     const finish = (callback) => {
-      if (settled) return;
+      if (settled) {
+        return;
+      }
+
       settled = true;
       cleanup();
       callback();
@@ -60,7 +70,10 @@ export async function download(config, options = {}) {
     };
 
     options.signal?.addEventListener("abort", abort, { once: true });
-    if (options.signal?.aborted) abort();
+
+    if (options.signal?.aborted) {
+      abort();
+    }
 
     child.once("error", (cause) => {
       const notFound = /** @type {NodeJS.ErrnoException} */ (cause).code === "ENOENT";
@@ -78,15 +91,19 @@ export async function download(config, options = {}) {
       finish(() => {
         if (options.signal?.aborted) {
           reject(new DownloadError("Download cancelled.", { code: "ABORTED" }));
-        } else if (code === 0) {
-          resolve();
-        } else {
-          reject(
-            new DownloadError(`yt-dlp failed (${signal ?? `exit ${code ?? "unknown"}`}).`, {
-              code: "EXIT_FAILED",
-            }),
-          );
+          return;
         }
+
+        if (code === 0) {
+          resolve();
+          return;
+        }
+
+        reject(
+          new DownloadError(`yt-dlp failed (${signal ?? `exit ${code ?? "unknown"}`}).`, {
+            code: "EXIT_FAILED",
+          }),
+        );
       });
     });
   });

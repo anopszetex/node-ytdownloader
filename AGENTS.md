@@ -13,7 +13,33 @@ video and audio directly to a destination directory.
 - Prefer Node.js built-ins over dependencies when the built-in API is enough.
 - Keep user-facing messages short, concrete, and actionable.
 - Format and lint with Biome.
+- Use ESLint only for structural rules that Biome cannot enforce.
 - Test with `node:test` and `node:assert/strict`.
+
+## Readability and control flow
+
+- Always use braces around `if`, loops, and every other block statement.
+- Use guard clauses. Do not use `else`, `else if`, `switch`, or `do...while`.
+- Keep related declarations together, one declaration per line.
+- Add one blank line between declarations, validation, transformation, and effects.
+- Keep functions small, with at most two levels of nested control flow.
+- Avoid nested ternaries and clever expressions. Choose explicit, boring code.
+- Use full names. Avoid abbreviations that require context to understand.
+- Let Biome own mechanical formatting; use blank lines to expose intent.
+
+## Object Calisthenics
+
+Apply Object Calisthenics pragmatically to the functional architecture:
+
+- one main level of indentation per function whenever practical;
+- guard clauses instead of `else`;
+- small modules and cohesive value objects;
+- immutable values and explicit dependencies;
+- effects isolated at the application boundaries;
+- no classes or primitive wrappers without a domain invariant to protect;
+- no abstraction created only to satisfy a pattern.
+
+Clarity, correctness, and measured performance win over dogmatic compliance.
 
 ## Architecture
 
