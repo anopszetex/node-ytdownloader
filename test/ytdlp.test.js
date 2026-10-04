@@ -5,12 +5,22 @@ import { buildYtdlpArgs } from "../src/infra/ytdlp.js";
 
 describe("yt-dlp command", () => {
   it("prefers M4A audio without transcoding", () => {
-    assert.equal(selectFormat("best"), "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best");
     assert.equal(
-      selectFormat(1080),
+      selectFormat("best", "original"),
+      "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best",
+    );
+    assert.equal(
+      selectFormat(1080, "original"),
       "bestvideo*[height<=1080]+bestaudio[ext=m4a]/" +
         "bestvideo*[height<=1080]+bestaudio/best[height<=1080]",
     );
+  });
+
+  it("prioritizes H.264 up to 1080p in universal mode", () => {
+    assert.match(selectFormat(1080, "universal"), /vcodec\^=avc1/);
+    assert.doesNotMatch(selectFormat(1440, "universal"), /vcodec\^=avc1/);
+    assert.match(selectFormat("best", "universal"), /height>1080/);
+    assert.match(selectFormat("best", "universal"), /vcodec\^=avc1/);
   });
 
   it("writes directly to the requested directory", () => {
@@ -19,6 +29,7 @@ describe("yt-dlp command", () => {
       outputDirectory: "/tmp/downloads",
       quality: "best",
       connections: 8,
+      compatibility: "original",
       executable: "yt-dlp",
       cookiesFromBrowser: undefined,
       cookiesFile: undefined,
@@ -42,6 +53,7 @@ describe("yt-dlp command", () => {
       outputDirectory: "/tmp/downloads",
       quality: "best",
       connections: 8,
+      compatibility: "original",
       executable: "yt-dlp",
       cookiesFromBrowser: undefined,
       cookiesFile: undefined,
@@ -61,6 +73,7 @@ describe("yt-dlp command", () => {
       outputDirectory: "/tmp/downloads",
       quality: "best",
       connections: 8,
+      compatibility: "original",
       executable: "yt-dlp",
       cookiesFromBrowser: "firefox",
       cookiesFile: undefined,

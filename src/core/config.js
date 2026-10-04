@@ -1,5 +1,10 @@
 import path from "node:path";
-import { validateConnections, validateQuality, validateUrl } from "./validators.js";
+import {
+  validateCompatibility,
+  validateConnections,
+  validateQuality,
+  validateUrl,
+} from "./validators.js";
 
 /**
  * @param {string} value
@@ -32,6 +37,7 @@ function validateCookies(input) {
  * @property {string} outputDirectory
  * @property {string} quality
  * @property {string} connections
+ * @property {string} compatibility
  * @property {string} executable
  * @property {string | undefined} cookiesFromBrowser
  * @property {string | undefined} cookiesFile
@@ -44,6 +50,7 @@ function validateCookies(input) {
  * @property {string} outputDirectory
  * @property {'best' | 720 | 1080 | 1440 | 2160} quality
  * @property {number} connections
+ * @property {'original' | 'universal'} compatibility
  * @property {string} executable
  * @property {string | undefined} cookiesFromBrowser
  * @property {string | undefined} cookiesFile
@@ -66,6 +73,7 @@ export function createConfig(input, cwd = process.cwd()) {
     outputDirectory: path.resolve(cwd, input.outputDirectory),
     quality: validateQuality(input.quality),
     connections: validateConnections(input.connections),
+    compatibility: validateCompatibility(input.compatibility),
     executable: input.executable,
     cookiesFromBrowser: input.cookiesFromBrowser,
     cookiesFile: input.cookiesFile ? path.resolve(cwd, input.cookiesFile) : undefined,

@@ -128,7 +128,7 @@ export function buildYtdlpArgs(config) {
     "--concurrent-fragments",
     String(config.connections),
     "--format",
-    selectFormat(config.quality),
+    selectFormat(config.quality, config.compatibility),
     "--merge-output-format",
     "mp4",
     "--remux-video",

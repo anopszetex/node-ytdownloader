@@ -41,6 +41,7 @@ Opções:
   -o, --output <dir>       Pasta de destino
   -q, --quality <value>    best, 720, 1080, 1440 ou 2160
   -N, --connections <n>    Fragmentos simultâneos, de 1 a 32
+      --compatibility      original ou universal
       --ytdlp <path>       Caminho do executável yt-dlp
       --cookies-from-browser <browser>
                            Usa cookies de um navegador
@@ -55,6 +56,16 @@ Exemplo:
 ```sh
 ytdown "https://example.com/video" --output ~/Videos --quality 2160 --connections 16
 ```
+
+Para máxima compatibilidade entre macOS, Windows, Linux e celulares:
+
+```sh
+ytdown "https://example.com/video" --quality 1080 --compatibility universal
+```
+
+O modo `universal` prioriza H.264 + AAC em 720p e 1080p. Em 1440p, 2160p ou
+quando uma fonte acima de 1080p está disponível com `best`, mantém o melhor
+codec oferecido pelo site para evitar transcodificação e perda de qualidade.
 
 Durante o download, a CLI apresenta título, percentual, velocidade e tempo
 estimado em português. Em terminais interativos, a barra é atualizada na mesma

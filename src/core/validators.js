@@ -1,4 +1,5 @@
 const QUALITY_VALUES = new Set([720, 1080, 1440, 2160]);
+const COMPATIBILITY_VALUES = new Set(["original", "universal"]);
 
 /** @param {string} value */
 export function validateUrl(value) {
@@ -35,4 +36,13 @@ export function validateConnections(value) {
     throw new TypeError("O número de conexões deve ser um inteiro de 1 a 32.");
   }
   return connections;
+}
+
+/** @param {string} value */
+export function validateCompatibility(value) {
+  if (!COMPATIBILITY_VALUES.has(value)) {
+    throw new TypeError("A compatibilidade deve ser original ou universal.");
+  }
+
+  return /** @type {'original' | 'universal'} */ (value);
 }

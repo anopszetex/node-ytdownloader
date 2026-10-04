@@ -7,6 +7,7 @@ const input = {
   outputDirectory: "downloads",
   quality: "best",
   connections: "8",
+  compatibility: "original",
   executable: "yt-dlp",
   cookiesFromBrowser: undefined,
   cookiesFile: undefined,
@@ -47,5 +48,10 @@ describe("createConfig", () => {
         }),
       /não ambos/,
     );
+  });
+
+  it("validates compatibility mode", () => {
+    assert.equal(createConfig({ ...input, compatibility: "universal" }).compatibility, "universal");
+    assert.throws(() => createConfig({ ...input, compatibility: "quicktime" }), /compatibilidade/);
   });
 });

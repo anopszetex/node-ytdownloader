@@ -17,6 +17,7 @@ async function createTestConfig(url) {
       outputDirectory,
       quality: "best",
       connections: 1,
+      compatibility: "original",
       executable,
       cookiesFromBrowser: undefined,
       cookiesFile: undefined,

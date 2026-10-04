@@ -10,6 +10,8 @@ Opções:
   -o, --output <dir>       Pasta de destino (padrão: downloads)
   -q, --quality <value>    best, 720, 1080, 1440 ou 2160 (padrão: best)
   -N, --connections <n>    Fragmentos simultâneos de 1 a 32 (padrão: 8)
+      --compatibility <mode>
+                           original ou universal (padrão: original)
       --ytdlp <path>       Executável do yt-dlp (padrão: yt-dlp)
       --cookies-from-browser <browser>
                            Lê cookies de um navegador, como chrome ou firefox
@@ -32,6 +34,7 @@ export function parseCliArgs(args) {
       output: { type: "string", short: "o", default: "downloads" },
       quality: { type: "string", short: "q", default: "best" },
       connections: { type: "string", short: "N", default: "8" },
+      compatibility: { type: "string", default: "original" },
       ytdlp: { type: "string", default: "yt-dlp" },
       "cookies-from-browser": { type: "string" },
       cookies: { type: "string" },
@@ -60,6 +63,7 @@ export function parseCliArgs(args) {
       outputDirectory: values.output,
       quality: values.quality,
       connections: values.connections,
+      compatibility: values.compatibility,
       executable: values.ytdlp,
       cookiesFromBrowser: values["cookies-from-browser"],
       cookiesFile: values.cookies,
