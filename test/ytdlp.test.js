@@ -4,9 +4,13 @@ import { selectFormat } from "../src/core/formats.js";
 import { buildYtdlpArgs } from "../src/infra/ytdlp.js";
 
 describe("yt-dlp command", () => {
-  it("selects the best source quality without transcoding", () => {
-    assert.equal(selectFormat("best"), "bestvideo*+bestaudio/best");
-    assert.equal(selectFormat(1080), "bestvideo*[height<=1080]+bestaudio/best[height<=1080]");
+  it("prefers M4A audio without transcoding", () => {
+    assert.equal(selectFormat("best"), "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best");
+    assert.equal(
+      selectFormat(1080),
+      "bestvideo*[height<=1080]+bestaudio[ext=m4a]/" +
+        "bestvideo*[height<=1080]+bestaudio/best[height<=1080]",
+    );
   });
 
   it("writes directly to the requested directory", () => {

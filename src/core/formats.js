@@ -4,8 +4,12 @@
  */
 export function selectFormat(quality) {
   if (quality === "best") {
-    return "bestvideo*+bestaudio/best";
+    return "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best";
   }
 
-  return `bestvideo*[height<=${quality}]+bestaudio/best[height<=${quality}]`;
+  return [
+    `bestvideo*[height<=${quality}]+bestaudio[ext=m4a]`,
+    `bestvideo*[height<=${quality}]+bestaudio`,
+    `best[height<=${quality}]`,
+  ].join("/");
 }

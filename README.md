@@ -66,7 +66,8 @@ falha, execute novamente com `--verbose`.
 
 O MP4 é produzido por remux, sem recodificar vídeo ou áudio. Isso mantém a
 qualidade original e evita o custo de uma conversão. Os codecs internos podem
-continuar sendo AV1, VP9 ou Opus, conforme a melhor fonte oferecida pelo site.
+continuar sendo AV1 ou VP9. Para garantir áudio compatível em MP4, a seleção
+prioriza M4A/AAC e usa outros codecs somente como fallback.
 
 `--connections` acelera apenas mídias fragmentadas e depende dos limites do
 servidor e da conexão. Mais conexões nem sempre significam mais velocidade.
