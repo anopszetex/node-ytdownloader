@@ -25,22 +25,22 @@ function createOutput(interactive) {
   };
 }
 
-describe("progress formatting", () => {
-  it("formats byte and time values", () => {
+describe("formatação do progresso", () => {
+  it("formata valores de bytes e tempo", () => {
     assert.equal(formatBytes(0), "0 B");
     assert.equal(formatBytes(1_048_576), "1.0 MiB");
     assert.equal(formatBytes(undefined), "—");
     assert.equal(formatDuration(65), "01:05");
   });
 
-  it("calculates bounded percentages and bars", () => {
+  it("calcula percentuais limitados e barras", () => {
     assert.equal(calculatePercentage(512, 1024), 50);
     assert.equal(calculatePercentage(1200, 1000), 100);
     assert.equal(calculatePercentage(1, undefined), undefined);
     assert.equal(createBar(50, 10), "█████░░░░░");
   });
 
-  it("formats a complete progress line in Portuguese", () => {
+  it("formata uma linha completa de progresso em português", () => {
     const line = formatProgress({
       downloadedBytes: 512,
       totalBytes: 1024,
@@ -54,13 +54,13 @@ describe("progress formatting", () => {
     assert.match(line, /ETA 00:02/);
   });
 
-  it("removes terminal control sequences from remote text", () => {
+  it("remove sequências de controle do terminal em textos remotos", () => {
     assert.equal(sanitizeTerminalText("safe\u001B[31m red\u0007\nnext"), "safe red  next");
   });
 });
 
-describe("createProgressReporter", () => {
-  it("updates one terminal line in interactive mode", () => {
+describe("relatório de progresso", () => {
+  it("atualiza uma linha do terminal no modo interativo", () => {
     const { chunks, output } = createOutput(true);
     const report = createProgressReporter({ output, interactive: true });
 
@@ -75,7 +75,7 @@ describe("createProgressReporter", () => {
     assert.ok(chunks.join("").startsWith("\r\u001B[2KBaixando"));
   });
 
-  it("limits plain output to percentage buckets", () => {
+  it("limita a saída simples por faixas de percentual", () => {
     const { chunks, output } = createOutput(false);
     const report = createProgressReporter({ output, interactive: false });
     const progress = (downloadedBytes) => ({
@@ -93,7 +93,7 @@ describe("createProgressReporter", () => {
     assert.equal(chunks.length, 2);
   });
 
-  it("renders lifecycle messages in Portuguese", () => {
+  it("exibe mensagens do ciclo de vida em português", () => {
     const { chunks, output } = createOutput(false);
     const report = createProgressReporter({ output, interactive: false });
 
