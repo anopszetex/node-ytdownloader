@@ -1,7 +1,7 @@
 import { createConfig } from "../core/config.js";
 import { DownloadError } from "../core/errors.js";
 import { download } from "../infra/ytdlp.js";
-import { openDownloadMenu } from "./menu.js";
+import { confirmChromeAuthentication, openDownloadMenu } from "./menu.js";
 import { createProgressReporter } from "./progress.js";
 
 /** @param {string} message */
@@ -52,7 +52,15 @@ export async function main(argumentsList = process.argv.slice(2)) {
     const config = createConfig(input);
     const reportProgress = createProgressReporter();
 
-    await download(config, { signal: controller.signal, onEvent: reportProgress });
+    await download(config, {
+      signal: controller.signal,
+      onEvent: reportProgress,
+      onAuthenticationRequired: async () => {
+        const confirmed = await confirmChromeAuthentication({ signal: controller.signal });
+
+        return confirmed ? "chrome" : undefined;
+      },
+    });
 
     return 0;
   } catch (error) {

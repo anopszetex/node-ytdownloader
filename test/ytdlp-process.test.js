@@ -21,8 +21,8 @@ async function createTestConfig(url) {
   };
 }
 
-describe("download process", () => {
-  it("delivers structured events from the child process", async (context) => {
+describe("processo de download", () => {
+  it("entrega eventos estruturados do processo filho", async (context) => {
     const { config, dispose } = await createTestConfig("https://example.com/success");
     const events = [];
 
@@ -35,7 +35,7 @@ describe("download process", () => {
     );
   });
 
-  it("retries with conversion only when compatible formats are unavailable", async (context) => {
+  it("tenta converter somente quando formatos compatíveis estão indisponíveis", async (context) => {
     const { config, dispose } = await createTestConfig("https://example.com/fallback");
     const events = [];
 
@@ -48,7 +48,7 @@ describe("download process", () => {
     );
   });
 
-  it("does not retry unrelated failures", async (context) => {
+  it("não repete falhas sem relação com o formato", async (context) => {
     const { config, dispose } = await createTestConfig("https://example.com/fail");
     const events = [];
 
@@ -59,7 +59,45 @@ describe("download process", () => {
     assert.deepEqual(events, [{ type: "failed" }]);
   });
 
-  it("terminates an active child when cancelled", async (context) => {
+  it("repete com o navegador autorizado pelo usuário", async (context) => {
+    const { config, dispose } = await createTestConfig("https://example.com/auth");
+    const events = [];
+    let authenticationRequests = 0;
+
+    context.after(dispose);
+    await download(config, {
+      executable,
+      onAuthenticationRequired: async () => {
+        authenticationRequests += 1;
+        return "chrome";
+      },
+      onEvent: (event) => events.push(event),
+    });
+
+    assert.equal(authenticationRequests, 1);
+    assert.deepEqual(
+      events.map((event) => event.type),
+      ["start", "progress", "processing", "complete"],
+    );
+  });
+
+  it("não repete a autenticação sem consentimento", async (context) => {
+    const { config, dispose } = await createTestConfig("https://example.com/auth");
+    const events = [];
+
+    context.after(dispose);
+    await assert.rejects(
+      download(config, {
+        executable,
+        onAuthenticationRequired: async () => undefined,
+        onEvent: (event) => events.push(event),
+      }),
+      { code: "AUTH_REQUIRED" },
+    );
+    assert.deepEqual(events, [{ type: "failed" }]);
+  });
+
+  it("encerra um processo filho ativo quando cancelado", async (context) => {
     const { config, dispose } = await createTestConfig("https://example.com/wait");
     const controller = new AbortController();
 
@@ -79,7 +117,7 @@ describe("download process", () => {
     await assert.rejects(result, { code: "ABORTED" });
   });
 
-  it("forces termination when the child ignores the first signal", async (context) => {
+  it("força o encerramento quando o processo ignora o primeiro sinal", async (context) => {
     const { config, dispose } = await createTestConfig("https://example.com/ignore-termination");
     const controller = new AbortController();
 

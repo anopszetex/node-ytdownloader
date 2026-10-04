@@ -15,6 +15,8 @@ then writes an editor-friendly MP4 to `./downloads`.
 - Format and lint with Biome.
 - Use ESLint only for structural rules that Biome cannot enforce.
 - Test with `node:test` and `node:assert/strict`.
+- Keep test suite and test case titles in Portuguese.
+- Update tests with every behavior change, including relevant failure and cancellation paths.
 
 ## Readability and control flow
 
@@ -69,6 +71,7 @@ Clarity, correctness, and measured performance win over dogmatic compliance.
 - Build child-process arguments as arrays; never interpolate input into a shell.
 - Do not use `shell: true`.
 - Do not overwrite output files unless the user explicitly requests it.
+- Read browser cookies only after explicit interactive consent and never expose their contents.
 
 ## Delivery
 

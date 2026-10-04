@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { PassThrough } from "node:stream";
 import { describe, it } from "node:test";
-import { openDownloadMenu } from "../src/cli/menu.js";
+import { confirmChromeAuthentication, openDownloadMenu } from "../src/cli/menu.js";
 
 function createMenuInput(lines) {
   const output = new PassThrough();
@@ -17,8 +17,8 @@ function createMenuInput(lines) {
   };
 }
 
-describe("openDownloadMenu", () => {
-  it("collects a confirmed download", async () => {
+describe("menu de download", () => {
+  it("coleta um download confirmado", async () => {
     const terminal = createMenuInput(["https://example.com/video", "1", ""]);
     const controller = new AbortController();
 
@@ -31,7 +31,7 @@ describe("openDownloadMenu", () => {
     assert.match(terminal.text(), /Destino: \.\/downloads/);
   });
 
-  it("repeats invalid URL and quality questions", async () => {
+  it("repete as perguntas de URL e qualidade inválidas", async () => {
     const terminal = createMenuInput(["not-a-url", "https://example.com/video", "9", "2", "sim"]);
     const controller = new AbortController();
 
@@ -42,12 +42,40 @@ describe("openDownloadMenu", () => {
     assert.match(terminal.text(), /Escolha 1 ou 2/);
   });
 
-  it("returns no input when the user declines", async () => {
+  it("não retorna uma entrada quando o usuário recusa", async () => {
     const terminal = createMenuInput(["https://example.com/video", "1", "n"]);
     const controller = new AbortController();
 
     const input = await openDownloadMenu({ ...terminal, signal: controller.signal });
 
     assert.equal(input, undefined);
+  });
+});
+
+describe("confirmação de autenticação do Chrome", () => {
+  it("solicita consentimento e valida a escolha", async () => {
+    const terminal = createMenuInput(["invalid", "1"]);
+    const controller = new AbortController();
+
+    const confirmed = await confirmChromeAuthentication({
+      ...terminal,
+      signal: controller.signal,
+    });
+
+    assert.equal(confirmed, true);
+    assert.match(terminal.text(), /sessão do Chrome/);
+    assert.match(terminal.text(), /Escolha 1 ou 2/);
+  });
+
+  it("respeita a recusa de autenticação", async () => {
+    const terminal = createMenuInput(["2"]);
+    const controller = new AbortController();
+
+    const confirmed = await confirmChromeAuthentication({
+      ...terminal,
+      signal: controller.signal,
+    });
+
+    assert.equal(confirmed, false);
   });
 });

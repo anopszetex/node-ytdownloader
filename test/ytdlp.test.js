@@ -9,8 +9,8 @@ const config = {
   quality: 1080,
 };
 
-describe("yt-dlp command", () => {
-  it("selects H.264 and AAC without transcoding first", () => {
+describe("comando do yt-dlp", () => {
+  it("seleciona primeiro H.264 e AAC sem transcodificação", () => {
     const format = selectCompatibleFormat(1080);
     const argumentsList = buildYtdlpArgs(config);
 
@@ -20,7 +20,7 @@ describe("yt-dlp command", () => {
     assert.equal(argumentsList[argumentsList.indexOf("--merge-output-format") + 1], "mp4");
   });
 
-  it("builds a bounded conversion fallback", () => {
+  it("monta uma conversão alternativa limitada à resolução escolhida", () => {
     const format = selectConversionFormat(720);
     const argumentsList = buildYtdlpArgs({ ...config, quality: 720 }, { convert: true });
     const postprocessorArguments = argumentsList[argumentsList.indexOf("--postprocessor-args") + 1];
@@ -32,7 +32,7 @@ describe("yt-dlp command", () => {
     assert.match(postprocessorArguments, /-c:a aac/);
   });
 
-  it("writes directly without overwriting download or post-process output", () => {
+  it("grava diretamente sem sobrescrever arquivos", () => {
     const argumentsList = buildYtdlpArgs(config);
 
     assert.ok(argumentsList.includes("--paths"));
@@ -41,5 +41,17 @@ describe("yt-dlp command", () => {
     assert.ok(argumentsList.includes("--no-post-overwrites"));
     assert.equal(argumentsList.at(-1), "https://example.com/video");
     assert.equal(argumentsList.includes("--exec"), false);
+  });
+
+  it("envia autenticação do navegador somente quando solicitada", () => {
+    const anonymousArguments = buildYtdlpArgs(config);
+    const authenticatedArguments = buildYtdlpArgs(config, { cookiesFromBrowser: "chrome" });
+
+    assert.equal(anonymousArguments.includes("--cookies-from-browser"), false);
+    assert.deepEqual(authenticatedArguments.slice(-3), [
+      "--cookies-from-browser",
+      "chrome",
+      config.url,
+    ]);
   });
 });
