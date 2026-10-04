@@ -110,7 +110,7 @@ function createSpawnError(cause, executable) {
 /**
  * Build arguments separately so command construction stays testable.
  * @param {Readonly<DownloadConfig>} config
- * @param {{ convert?: boolean }} [options]
+ * @param {{ convert?: boolean, cookiesFromBrowser?: string }} [options]
  */
 export function buildYtdlpArgs(config, options = {}) {
   const convert = options.convert ?? false;
@@ -160,6 +160,10 @@ export function buildYtdlpArgs(config, options = {}) {
 
   if (ffmpegPath) {
     argumentsList.push("--ffmpeg-location", ffmpegPath);
+  }
+
+  if (options.cookiesFromBrowser) {
+    argumentsList.push("--cookies-from-browser", options.cookiesFromBrowser);
   }
 
   return [...argumentsList, config.url];
@@ -230,7 +234,7 @@ function forceTerminateProcessTree(child) {
 
 /**
  * @param {Readonly<DownloadConfig>} config
- * @param {{ convert: boolean, executable: string, signal?: AbortSignal, onEvent: (event: object) => void, onDiagnostic?: (message: string) => void, terminationGracePeriod: number }} options
+ * @param {{ convert: boolean, executable: string, cookiesFromBrowser?: string, signal?: AbortSignal, onEvent: (event: object) => void, onDiagnostic?: (message: string) => void, terminationGracePeriod: number }} options
  */
 function runDownloadAttempt(config, options) {
   return new Promise((resolve, reject) => {
@@ -309,7 +313,7 @@ function runDownloadAttempt(config, options) {
 
 /**
  * @param {Readonly<DownloadConfig>} config
- * @param {{ executable: string, signal?: AbortSignal, onEvent: (event: object) => void, onDiagnostic?: (message: string) => void, terminationGracePeriod: number }} options
+ * @param {{ executable: string, cookiesFromBrowser?: string, signal?: AbortSignal, onEvent: (event: object) => void, onDiagnostic?: (message: string) => void, terminationGracePeriod: number }} options
  */
 async function runWithCompatibilityFallback(config, options) {
   try {
@@ -326,9 +330,37 @@ async function runWithCompatibilityFallback(config, options) {
 }
 
 /**
+ * @param {Readonly<DownloadConfig>} config
+ * @param {{ executable: string, cookiesFromBrowser?: string, signal?: AbortSignal, onEvent: (event: object) => void, onDiagnostic?: (message: string) => void, terminationGracePeriod: number }} options
+ * @param {(() => Promise<string | undefined>) | undefined} onAuthenticationRequired
+ */
+async function runWithAuthenticationFallback(config, options, onAuthenticationRequired) {
+  try {
+    await runWithCompatibilityFallback(config, options);
+    return;
+  } catch (error) {
+    if (!(error instanceof DownloadError) || error.code !== "AUTH_REQUIRED") {
+      throw error;
+    }
+
+    if (!onAuthenticationRequired) {
+      throw error;
+    }
+
+    const cookiesFromBrowser = await onAuthenticationRequired();
+
+    if (!cookiesFromBrowser) {
+      throw error;
+    }
+
+    await runWithCompatibilityFallback(config, { ...options, cookiesFromBrowser });
+  }
+}
+
+/**
  * Download directly through yt-dlp, converting only when compatible streams are unavailable.
  * @param {Readonly<DownloadConfig>} config
- * @param {{ signal?: AbortSignal, onEvent?: (event: object) => void, onDiagnostic?: (message: string) => void, executable?: string, terminationGracePeriod?: number }} [options]
+ * @param {{ signal?: AbortSignal, onEvent?: (event: object) => void, onDiagnostic?: (message: string) => void, onAuthenticationRequired?: () => Promise<string | undefined>, executable?: string, terminationGracePeriod?: number }} [options]
  */
 export async function download(config, options = {}) {
   const onEvent = options.onEvent ?? (() => {});
@@ -343,7 +375,7 @@ export async function download(config, options = {}) {
   await mkdir(config.outputDirectory, { recursive: true });
 
   try {
-    await runWithCompatibilityFallback(config, attemptOptions);
+    await runWithAuthenticationFallback(config, attemptOptions, options.onAuthenticationRequired);
   } catch (error) {
     onEvent({ type: "failed" });
     throw error;

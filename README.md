@@ -75,11 +75,12 @@ FFmpeg serão encerrados.
 - oferece 720p e 1080p;
 - salva sempre em `./downloads`;
 - precisa ser executada em um terminal interativo;
-- não oferece download de MP3 ou modo somente áudio;
-- não oferece autenticação por cookies nesta versão.
+- não oferece download de MP3 ou modo somente áudio.
 
-Se um site exigir login, a CLI apresenta uma mensagem de erro e encerra sem
-tentar outra estratégia automaticamente.
+Se o site exigir autenticação, a CLI pode pedir autorização para tentar
+novamente com a sessão do Chrome. Os cookies são lidos diretamente pelo
+`yt-dlp`; o Node.js não acessa nem armazena seu conteúdo. Recusar a autorização
+encerra a tentativa sem acessar o navegador.
 
 ## Desenvolvimento
 
