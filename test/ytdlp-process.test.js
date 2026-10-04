@@ -15,13 +15,7 @@ async function createTestConfig(url) {
     config: {
       url,
       outputDirectory,
-      quality: "best",
-      connections: 1,
-      compatibility: "original",
-      executable,
-      cookiesFromBrowser: undefined,
-      cookiesFile: undefined,
-      verbose: false,
+      quality: 1080,
     },
     dispose: () => rm(outputDirectory, { recursive: true, force: true }),
   };
@@ -33,32 +27,75 @@ describe("download process", () => {
     const events = [];
 
     context.after(dispose);
-    await download(config, { onEvent: (event) => events.push(event) });
+    await download(config, { executable, onEvent: (event) => events.push(event) });
 
     assert.deepEqual(
       events.map((event) => event.type),
       ["start", "progress", "processing", "complete"],
     );
+  });
+
+  it("retries with conversion only when compatible formats are unavailable", async (context) => {
+    const { config, dispose } = await createTestConfig("https://example.com/fallback");
+    const events = [];
+
+    context.after(dispose);
+    await download(config, { executable, onEvent: (event) => events.push(event) });
+
     assert.deepEqual(
-      events.find((event) => event.type === "progress"),
-      {
-        type: "progress",
-        downloadedBytes: 50,
-        totalBytes: 100,
-        speedBytesPerSecond: 25,
-        etaSeconds: 2,
-      },
+      events.map((event) => event.type),
+      ["fallback", "start", "progress", "processing", "complete"],
     );
   });
 
-  it("classifies diagnostics from a failed child process", async (context) => {
+  it("does not retry unrelated failures", async (context) => {
     const { config, dispose } = await createTestConfig("https://example.com/fail");
+    const events = [];
 
     context.after(dispose);
-    await assert.rejects(download(config), {
+    await assert.rejects(download(config, { executable, onEvent: (event) => events.push(event) }), {
       code: "RATE_LIMIT",
-      message:
-        "O site limitou temporariamente as requisições. Aguarde e tente novamente com menos conexões.",
     });
+    assert.deepEqual(events, [{ type: "failed" }]);
+  });
+
+  it("terminates an active child when cancelled", async (context) => {
+    const { config, dispose } = await createTestConfig("https://example.com/wait");
+    const controller = new AbortController();
+
+    context.after(dispose);
+
+    const result = download(config, {
+      executable,
+      onEvent: (event) => {
+        if (event.type === "start") {
+          controller.abort();
+        }
+      },
+      signal: controller.signal,
+      terminationGracePeriod: 20,
+    });
+
+    await assert.rejects(result, { code: "ABORTED" });
+  });
+
+  it("forces termination when the child ignores the first signal", async (context) => {
+    const { config, dispose } = await createTestConfig("https://example.com/ignore-termination");
+    const controller = new AbortController();
+
+    context.after(dispose);
+
+    const result = download(config, {
+      executable,
+      onEvent: (event) => {
+        if (event.type === "start") {
+          controller.abort();
+        }
+      },
+      signal: controller.signal,
+      terminationGracePeriod: 20,
+    });
+
+    await assert.rejects(result, { code: "ABORTED" });
   });
 });

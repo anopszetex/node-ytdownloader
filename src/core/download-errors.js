@@ -48,6 +48,6 @@ export function classifyDownloadFailure(diagnostics, exitCode) {
 
   return Object.freeze({
     code: "EXIT_FAILED",
-    message: `O yt-dlp não concluiu o download (código ${code}). Execute novamente com --verbose.`,
+    message: `O yt-dlp não concluiu o download (código ${code}). Atualize o yt-dlp e tente novamente.`,
   });
 }

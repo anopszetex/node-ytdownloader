@@ -7,6 +7,7 @@ import {
   formatBytes,
   formatDuration,
   formatProgress,
+  sanitizeTerminalText,
 } from "../src/cli/progress.js";
 
 function createOutput(interactive) {
@@ -52,6 +53,10 @@ describe("progress formatting", () => {
     assert.match(line, /256 B\/s/);
     assert.match(line, /ETA 00:02/);
   });
+
+  it("removes terminal control sequences from remote text", () => {
+    assert.equal(sanitizeTerminalText("safe\u001B[31m red\u0007\nnext"), "safe red  next");
+  });
 });
 
 describe("createProgressReporter", () => {
@@ -94,11 +99,12 @@ describe("createProgressReporter", () => {
 
     report({ type: "start", title: "Exemplo" });
     report({ type: "processing" });
+    report({ type: "processing" });
     report({ type: "complete", path: "/tmp/exemplo.webm" });
 
     assert.equal(
       chunks.join(""),
-      "Preparando download…\nVídeo: Exemplo\n\nProcessando mídia…\n" +
+      "Preparando download…\nVídeo: Exemplo\n\nFinalizando MP4…\n" +
         "✓ Download concluído\n  Arquivo: /tmp/exemplo.webm\n",
     );
   });

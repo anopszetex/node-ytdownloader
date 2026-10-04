@@ -1,11 +1,10 @@
 # node-ytdownloader
 
-CLI Node.js para baixar, com velocidade e qualidade, mídias de qualquer site
-suportado pelo [`yt-dlp`](https://github.com/yt-dlp/yt-dlp).
+CLI interativa para baixar vídeos do YouTube, TikTok e outros sites suportados
+pelo [`yt-dlp`](https://github.com/yt-dlp/yt-dlp).
 
-O Node.js apenas controla o processo. Os bytes são gravados diretamente pelo
-`yt-dlp`, sem cópias intermediárias e sem transcodificação. O FFmpeg é usado
-somente quando vídeo e áudio precisam ser combinados.
+O menu pede apenas a URL e a qualidade. O vídeo é salvo em MP4 dentro de
+`./downloads`, com áudio quando a fonte possui áudio.
 
 ## Requisitos
 
@@ -28,102 +27,140 @@ npm link
 ## Uso
 
 ```sh
-ytdown "https://example.com/video"
+ytdown
 ```
 
-Por padrão, a mídia é salva em `./downloads` com a melhor qualidade disponível
-e contêiner MP4.
+O menu apresenta o fluxo:
 
-```sh
-ytdown <url> [options]
+```text
+YTDOWN
 
-Opções:
-  -o, --output <dir>       Pasta de destino
-  -q, --quality <value>    best, 720, 1080, 1440 ou 2160
-  -N, --connections <n>    Fragmentos simultâneos, de 1 a 32
-      --compatibility      original ou universal
-      --ytdlp <path>       Caminho do executável yt-dlp
-      --cookies-from-browser <browser>
-                           Usa cookies de um navegador
-      --cookies <file>     Usa um arquivo de cookies no formato Netscape
-      --verbose            Exibe os logs técnicos do yt-dlp
-  -h, --help               Exibe ajuda
-  -v, --version            Exibe a versão
+URL do vídeo:
+> https://example.com/video
+
+Escolha a qualidade:
+1. 1080p — recomendado
+2. 720p
 ```
 
-Exemplo:
-
-```sh
-ytdown "https://example.com/video" --output ~/Videos --quality 2160 --connections 16
-```
-
-Para máxima compatibilidade entre macOS, Windows, Linux e celulares:
-
-```sh
-ytdown "https://example.com/video" --quality 1080 --compatibility universal
-```
-
-O modo `universal` prioriza H.264 + AAC em 720p e 1080p. Em 1440p, 2160p ou
-quando uma fonte acima de 1080p está disponível com `best`, mantém o melhor
-codec oferecido pelo site para evitar transcodificação e perda de qualidade.
+Antes de iniciar, a CLI mostra a qualidade e o destino para confirmação. URLs e
+escolhas inválidas podem ser corrigidas no próprio menu.
 
 Durante o download, a CLI apresenta título, percentual, velocidade e tempo
-estimado em português. Em terminais interativos, a barra é atualizada na mesma
-linha. Em pipelines e CI, o progresso é emitido em intervalos de 10% sem códigos
-ANSI.
+estimado. O resultado é sempre um arquivo MP4.
 
-Os logs técnicos do `yt-dlp` ficam ocultos normalmente. Para investigar uma
-falha, execute novamente com `--verbose`.
+## Compatibilidade e qualidade
 
-O MP4 é produzido por remux, sem recodificar vídeo ou áudio. Isso mantém a
-qualidade original e evita o custo de uma conversão. Os codecs internos podem
-continuar sendo AV1 ou VP9. Para garantir áudio compatível em MP4, a seleção
-prioriza M4A/AAC e usa outros codecs somente como fallback.
+A primeira tentativa seleciona H.264 e AAC/M4A, codecs amplamente aceitos por
+editores de vídeo. Quando a fonte já oferece esses codecs, o FFmpeg apenas
+combina ou remuxa os streams, sem perda de qualidade.
 
-`--connections` acelera apenas mídias fragmentadas e depende dos limites do
-servidor e da conexão. Mais conexões nem sempre significam mais velocidade.
+Se essa combinação não existir, a CLI baixa o melhor vídeo disponível até a
+resolução escolhida e converte para H.264 + AAC. A conversão é usada somente
+como fallback porque exige mais processamento e pode causar uma pequena perda
+de qualidade.
 
-### YouTube solicitando login
+A CLI não aumenta artificialmente a resolução. Um vídeo disponível apenas em
+480p continuará em 480p mesmo quando 1080p for escolhido.
 
-Se o YouTube responder com `Sign in to confirm you’re not a bot`, reutilize os
-cookies de um navegador no qual você já esteja autenticado:
+Arquivos existentes não são sobrescritos. Downloads parciais podem ser
+retomados pelo `yt-dlp` em uma execução posterior.
 
-```sh
-npm start -- "https://youtu.be/rWKE-mhpzOs?list=RDrWKE-mhpzOs" --cookies-from-browser chrome
-```
+Para cancelar, pressione `Ctrl+C`. O download e qualquer processamento do
+FFmpeg serão encerrados.
 
-Também funciona com o comando instalado:
+## Limites atuais
 
-```sh
-ytdown "https://youtu.be/rWKE-mhpzOs" --cookies-from-browser firefox
-```
+- baixa um vídeo por execução;
+- oferece 720p e 1080p;
+- salva sempre em `./downloads`;
+- precisa ser executada em um terminal interativo;
+- não oferece download de MP3 ou modo somente áudio;
+- não oferece autenticação por cookies nesta versão.
 
-Para um perfil específico, use a sintaxe aceita pelo `yt-dlp`, como
-`chrome:Default`. Alternativamente, forneça um arquivo:
-
-```sh
-ytdown "<url>" --cookies ~/cookies.txt
-```
-
-Não adicione arquivos de cookies ao Git nem compartilhe esses arquivos. Eles
-podem conceder acesso à sua conta.
+Se um site exigir login, a CLI apresenta uma mensagem de erro e encerra sem
+tentar outra estratégia automaticamente.
 
 ## Desenvolvimento
+
+### Comandos de qualidade
+
+| Comando | O que faz |
+| --- | --- |
+| `npm run format` | Formata os arquivos com o Biome. |
+| `npm run lint` | Analisa o código com Biome e ESLint, sem alterá-lo. |
+| `npm run check` | Confere formatação, lint e organização de imports. |
+| `npm run check:fix` | Aplica correções seguras e organiza imports. |
+| `npm test` | Executa os testes nativos do Node.js. |
+
+Antes de entregar uma mudança, execute:
 
 ```sh
 npm run check
 npm test
 ```
 
-O `npm install` configura `.githooks/pre-commit`. Todo commit executa o Biome e
-os testes nativos do Node.js. A skill local `code-review` está em
+### Biome e ESLint
+
+O **Biome** é a ferramenta principal. Ele formata o código, organiza imports e
+detecta problemas gerais, como:
+
+- variáveis e imports não usados;
+- `let` que pode ser `const`;
+- blocos sem chaves;
+- `else` desnecessário.
+
+Por exemplo, `npm run lint` rejeita uma declaração não utilizada:
+
+```js
+const unusedUrl = "https://example.com";
+```
+
+Use a variável ou remova a declaração. O `check:fix` não a remove automaticamente,
+pois isso poderia apagar código ou comentários importantes.
+
+Correções seguras podem ser aplicadas automaticamente:
+
+```js
+// Antes
+let destination = "downloads";
+
+// Depois de npm run check:fix
+const destination = "downloads";
+```
+
+O **ESLint** complementa o Biome somente nas regras estruturais: limita complexidade
+e profundidade e impede `else`, `switch`, `do...while` e ternários aninhados. Isso
+favorece funções pequenas e guard clauses:
+
+```js
+function validate(value) {
+  if (!value) {
+    throw new Error("Value is required.");
+  }
+
+  return value;
+}
+```
+
+Formatar não substitui o lint: `npm run format` ajusta apenas a apresentação do
+código, enquanto `npm run lint` encontra possíveis erros e problemas estruturais.
+
+### Automação no editor e no Git
+
+No VS Code, a extensão recomendada do Biome formata, aplica correções seguras e
+organiza imports ao salvar arquivos JavaScript. As configurações compartilhadas
+estão em `.vscode/`.
+
+O `npm install` configura `.githooks/pre-commit`. Todo commit executa as validações
+e os testes antes de ser criado. A skill local `code-review` está em
 `.opencode/skills/code-review/SKILL.md` para revisões manuais e de pull requests.
 
 ## Arquitetura
 
 ```text
 src/
-├── cli/    # argumentos e ciclo de vida do processo
+├── cli/    # menu, apresentação e ciclo de vida do processo
 ├── core/   # validação e regras puras
 └── infra/  # filesystem e processo yt-dlp
 ```

@@ -4,7 +4,7 @@
   },
   "name": "@anopszetex/ytdownloader",
   "version": "1.0.0",
-  "description": "Fast CLI for downloading the best media available through yt-dlp.",
+  "description": "Interactive CLI for downloading editor-friendly MP4 videos through yt-dlp.",
   "bin": {
     "ytdown": "src/index.js"
   },
@@ -17,7 +17,9 @@
   "scripts": {
     "start": "node src/index.js",
     "check": "biome check . && eslint src test scripts fixtures",
-    "check:fix": "biome check --write .",
+    "check:fix": "biome check --write . && eslint src test scripts fixtures",
+    "format": "biome format --write .",
+    "lint": "biome lint . && eslint src test scripts fixtures",
     "test": "node --test",
     "prepare": "node scripts/install-hooks.js"
   },

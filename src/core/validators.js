@@ -1,5 +1,4 @@
-const QUALITY_VALUES = new Set([720, 1080, 1440, 2160]);
-const COMPATIBILITY_VALUES = new Set(["original", "universal"]);
+const QUALITY_VALUES = new Set([720, 1080]);
 
 /** @param {string} value */
 export function validateUrl(value) {
@@ -13,36 +12,15 @@ export function validateUrl(value) {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new TypeError("A URL deve usar HTTP ou HTTPS.");
   }
+
   return url.href;
 }
 
-/** @param {string} value */
+/** @param {number} value */
 export function validateQuality(value) {
-  if (value === "best") {
-    return value;
+  if (!QUALITY_VALUES.has(value)) {
+    throw new TypeError("A qualidade deve ser 720 ou 1080.");
   }
 
-  const quality = Number(value);
-  if (!QUALITY_VALUES.has(quality)) {
-    throw new TypeError("A qualidade deve ser best, 720, 1080, 1440 ou 2160.");
-  }
-  return /** @type {720 | 1080 | 1440 | 2160} */ (quality);
-}
-
-/** @param {string} value */
-export function validateConnections(value) {
-  const connections = Number(value);
-  if (!Number.isInteger(connections) || connections < 1 || connections > 32) {
-    throw new TypeError("O número de conexões deve ser um inteiro de 1 a 32.");
-  }
-  return connections;
-}
-
-/** @param {string} value */
-export function validateCompatibility(value) {
-  if (!COMPATIBILITY_VALUES.has(value)) {
-    throw new TypeError("A compatibilidade deve ser original ou universal.");
-  }
-
-  return /** @type {'original' | 'universal'} */ (value);
+  return /** @type {720 | 1080} */ (value);
 }

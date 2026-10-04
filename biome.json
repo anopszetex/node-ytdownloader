@@ -17,13 +17,26 @@
     "indentStyle": "space",
     "lineWidth": 100
   },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      },
       "style": {
         "noUselessElse": "error",
-        "useBlockStatements": "error"
+        "useBlockStatements": "error",
+        "useConst": "error"
       }
     }
   },

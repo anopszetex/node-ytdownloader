@@ -1,7 +1,24 @@
+import { stripVTControlCharacters } from "node:util";
+
 const BYTE_UNITS = ["B", "KiB", "MiB", "GiB", "TiB"];
 const DEFAULT_COLUMNS = 80;
 const MINIMUM_BAR_WIDTH = 10;
 const MAXIMUM_BAR_WIDTH = 30;
+
+/** @param {unknown} value */
+export function sanitizeTerminalText(value) {
+  const text = stripVTControlCharacters(String(value));
+  let sanitized = "";
+
+  for (const character of text) {
+    const codePoint = character.codePointAt(0) ?? 0;
+    const isControl = codePoint < 32 || (codePoint >= 127 && codePoint <= 159);
+
+    sanitized += isControl ? " " : character;
+  }
+
+  return sanitized;
+}
 
 /** @param {number | undefined} bytes */
 export function formatBytes(bytes) {
@@ -89,6 +106,7 @@ export function formatProgress(event, columns) {
 export function createProgressReporter(options = {}) {
   const output = options.output ?? process.stdout;
   const interactive = options.interactive ?? Boolean(output.isTTY);
+  let processingVisible = false;
   let progressVisible = false;
   let lastProgressBucket = -1;
 
@@ -108,7 +126,7 @@ export function createProgressReporter(options = {}) {
 
   const renderStart = (event) => {
     writeLine("Preparando download…");
-    writeLine(`Vídeo: ${event.title}`);
+    writeLine(`Vídeo: ${sanitizeTerminalText(event.title)}`);
     output.write("\n");
   };
 
@@ -146,14 +164,26 @@ export function createProgressReporter(options = {}) {
   };
 
   const renderProcessing = () => {
+    if (processingVisible) {
+      return;
+    }
+
     clearProgress();
-    writeLine("Processando mídia…");
+    writeLine("Finalizando MP4…");
+    processingVisible = true;
+  };
+
+  const renderFallback = () => {
+    clearProgress();
+    lastProgressBucket = -1;
+    processingVisible = false;
+    writeLine("Convertendo para um formato compatível…");
   };
 
   const renderComplete = (event) => {
     clearProgress();
     writeLine("✓ Download concluído");
-    writeLine(`  Arquivo: ${event.path}`);
+    writeLine(`  Arquivo: ${sanitizeTerminalText(event.path)}`);
   };
 
   const renderFailed = () => {
@@ -164,6 +194,7 @@ export function createProgressReporter(options = {}) {
     start: renderStart,
     progress: renderProgress,
     processing: renderProcessing,
+    fallback: renderFallback,
     complete: renderComplete,
     failed: renderFailed,
   });

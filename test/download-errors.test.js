@@ -24,6 +24,6 @@ describe("classifyDownloadFailure", () => {
 
     assert.equal(failure.code, "EXIT_FAILED");
     assert.match(failure.message, /código 7/);
-    assert.match(failure.message, /--verbose/);
+    assert.match(failure.message, /Atualize o yt-dlp/);
   });
 });
