@@ -2,9 +2,9 @@
 
 ## Product
 
-`node-ytdownloader` is a small, fast CLI that delegates media downloads to
-`yt-dlp`. It accepts any URL supported by `yt-dlp` and writes the best available
-video and audio directly to a destination directory.
+`node-ytdownloader` is a small interactive CLI that delegates video downloads
+to `yt-dlp`. It asks for one HTTP(S) URL and a 720p or 1080p quality target,
+then writes an editor-friendly MP4 to `./downloads`.
 
 ## Runtime and style
 
@@ -43,7 +43,7 @@ Clarity, correctness, and measured performance win over dogmatic compliance.
 
 ## Architecture
 
-- `src/cli`: argument parsing and process-level orchestration.
+- `src/cli`: interactive menu, presentation, and process-level orchestration.
 - `src/core`: pure domain rules, validation, and immutable configuration.
 - `src/infra`: external processes and filesystem effects.
 - Keep effects at the edges. Core functions must be deterministic when possible.
@@ -55,8 +55,9 @@ Clarity, correctness, and measured performance win over dogmatic compliance.
 ## Download path
 
 - Let `yt-dlp` write directly to disk. Do not proxy media bytes through Node.js.
-- Preserve the source codecs by default; transcoding costs time and quality.
-- Use FFmpeg only for merging separate video and audio streams.
+- Prefer source H.264 video and AAC audio to avoid unnecessary transcoding.
+- If compatible streams are unavailable, convert once to H.264 + AAC.
+- Never upscale a source beyond its available resolution.
 - Never use synchronous filesystem or child-process APIs in the download path.
 - Always propagate cancellation and terminate spawned children on shutdown.
 - Treat process exit codes and spawn errors explicitly.

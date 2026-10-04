@@ -4,22 +4,18 @@ import { createConfig } from "../src/core/config.js";
 
 const input = {
   url: "https://example.com/watch?v=1",
-  outputDirectory: "downloads",
-  quality: "best",
-  connections: "8",
-  executable: "yt-dlp",
-  cookiesFromBrowser: undefined,
-  cookiesFile: undefined,
-  verbose: false,
+  quality: 1080,
 };
 
 describe("createConfig", () => {
   it("normalizes and freezes valid input", () => {
     const config = createConfig(input, "/project");
 
-    assert.equal(config.url, "https://example.com/watch?v=1");
-    assert.equal(config.outputDirectory, "/project/downloads");
-    assert.equal(config.connections, 8);
+    assert.deepEqual(config, {
+      url: "https://example.com/watch?v=1",
+      outputDirectory: "/project/downloads",
+      quality: 1080,
+    });
     assert.ok(Object.isFrozen(config));
   });
 
@@ -31,21 +27,8 @@ describe("createConfig", () => {
     assert.throws(() => createConfig({ ...input, url: "file:///etc/passwd" }), /HTTP/);
   });
 
-  it("rejects invalid quality and concurrency", () => {
-    assert.throws(() => createConfig({ ...input, quality: "4k" }), /qualidade/);
-    assert.throws(() => createConfig({ ...input, connections: "0" }), /conexões/);
-    assert.throws(() => createConfig({ ...input, connections: "2.5" }), /conexões/);
-  });
-
-  it("accepts only one cookies source", () => {
-    assert.throws(
-      () =>
-        createConfig({
-          ...input,
-          cookiesFromBrowser: "chrome",
-          cookiesFile: "cookies.txt",
-        }),
-      /não ambos/,
-    );
+  it("accepts only 720p and 1080p", () => {
+    assert.equal(createConfig({ ...input, quality: 720 }).quality, 720);
+    assert.throws(() => createConfig({ ...input, quality: 2160 }), /720 ou 1080/);
   });
 });
