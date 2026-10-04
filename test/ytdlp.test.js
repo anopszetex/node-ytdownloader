@@ -32,6 +32,25 @@ describe("yt-dlp command", () => {
     assert.equal(args.includes("--newline"), true);
   });
 
+  it("generates an MP4 container without transcoding", () => {
+    const args = buildYtdlpArgs({
+      url: "https://example.com/video",
+      outputDirectory: "/tmp/downloads",
+      quality: "best",
+      connections: 8,
+      executable: "yt-dlp",
+      cookiesFromBrowser: undefined,
+      cookiesFile: undefined,
+      verbose: false,
+    });
+    const mergeFormatIndex = args.indexOf("--merge-output-format");
+    const remuxFormatIndex = args.indexOf("--remux-video");
+
+    assert.equal(args[mergeFormatIndex + 1], "mp4");
+    assert.equal(args[remuxFormatIndex + 1], "mp4");
+    assert.equal(args.includes("--recode-video"), false);
+  });
+
   it("passes browser cookies without exposing their contents", () => {
     const args = buildYtdlpArgs({
       url: "https://example.com/video",

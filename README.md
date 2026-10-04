@@ -31,7 +31,8 @@ npm link
 ytdown "https://example.com/video"
 ```
 
-Por padrão, a mídia é salva em `./downloads` com a melhor qualidade disponível.
+Por padrão, a mídia é salva em `./downloads` com a melhor qualidade disponível
+e contêiner MP4.
 
 ```sh
 ytdown <url> [options]
@@ -62,6 +63,10 @@ ANSI.
 
 Os logs técnicos do `yt-dlp` ficam ocultos normalmente. Para investigar uma
 falha, execute novamente com `--verbose`.
+
+O MP4 é produzido por remux, sem recodificar vídeo ou áudio. Isso mantém a
+qualidade original e evita o custo de uma conversão. Os codecs internos podem
+continuar sendo AV1, VP9 ou Opus, conforme a melhor fonte oferecida pelo site.
 
 `--connections` acelera apenas mídias fragmentadas e depende dos limites do
 servidor e da conexão. Mais conexões nem sempre significam mais velocidade.
