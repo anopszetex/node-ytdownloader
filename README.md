@@ -93,7 +93,6 @@ encerra a tentativa sem acessar o navegador.
 | `npm run check` | Confere formatação, lint e organização de imports. |
 | `npm run check:fix` | Aplica correções seguras e organiza imports. |
 | `npm test` | Executa os testes nativos do Node.js. |
-| `npm run performance` | Executa a CLI e exibe CPU, memória e duração. |
 
 Antes de entregar uma mudança, execute:
 
@@ -101,22 +100,6 @@ Antes de entregar uma mudança, execute:
 npm run check
 npm test
 ```
-
-### Relatório de performance
-
-Para observar o custo do processo Node durante uma execução completa da CLI, use:
-
-```sh
-npm run performance
-```
-
-O download funciona normalmente e, ao final, são exibidos gráficos compactos de CPU e
-memória, além da duração e do estado da execução. A duração inclui o tempo gasto respondendo
-ao menu interativo.
-
-Esse relatório é uma ferramenta de desenvolvimento separada do comando `ytdown`. CPU e
-memória representam somente o processo Node; o consumo dos processos `yt-dlp` e FFmpeg não
-está incluído.
 
 ### Biome e ESLint
 
