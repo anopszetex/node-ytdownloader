@@ -1,5 +1,3 @@
-# yt-dlp-cli-nodejs
-
 <details>
 <summary><strong>🇧🇷 Ver documentação em Português (Brasil)</strong></summary>
 
@@ -179,6 +177,8 @@ Baixe apenas conteúdo para o qual você tenha autorização. Respeite direitos
 autorais, termos do serviço e leis aplicáveis.
 
 </details>
+
+# yt-dlp-cli-nodejs
 
 ---
 
