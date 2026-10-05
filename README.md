@@ -1,4 +1,4 @@
-# node-ytdownloader
+# yt-dlp-cli-nodejs
 
 CLI interativa para baixar vídeos do YouTube, TikTok e outros sites suportados
 pelo [`yt-dlp`](https://github.com/yt-dlp/yt-dlp).
