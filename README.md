@@ -1,49 +1,5 @@
 # yt-dlp-cli-nodejs
 
-An interactive Node.js CLI that downloads videos supported by [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) and produces editor-friendly MP4 files.
-
-## Highlights
-
-- Guided URL, quality, and confirmation flow.
-- Prefers H.264 and AAC/M4A streams to avoid unnecessary transcoding.
-- Falls back to FFmpeg conversion only when compatible streams are unavailable.
-- Displays title, progress, speed, and estimated time.
-- Supports resumable downloads and optional Chrome-session authentication with explicit consent.
-
-## Requirements
-
-- Node.js 22+
-- `yt-dlp` available on `PATH`
-
-```sh
-brew install yt-dlp
-npm install
-npm link
-ytdown
-```
-
-Downloads are written to `./downloads`. The CLI currently handles one video per run and offers 720p or 1080p limits; it never upscales the source.
-
-## Architecture
-
-```text
-src/
-├── cli/    # interaction, presentation, and process lifecycle
-├── core/   # validation and pure domain rules
-└── infra/  # filesystem and yt-dlp process integration
-```
-
-## Quality checks
-
-```sh
-npm run check
-npm test
-```
-
-The project uses Biome, ESLint, Node.js' native test runner, a pre-commit hook, and GitHub Actions. Download only content you are authorized to use and respect applicable terms and copyright law.
-
----
-
 <details>
 <summary><strong>🇧🇷 Ver documentação em Português (Brasil)</strong></summary>
 
@@ -223,3 +179,47 @@ Baixe apenas conteúdo para o qual você tenha autorização. Respeite direitos
 autorais, termos do serviço e leis aplicáveis.
 
 </details>
+
+---
+
+An interactive Node.js CLI that downloads videos supported by [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) and produces editor-friendly MP4 files.
+
+## Highlights
+
+- Guided URL, quality, and confirmation flow.
+- Prefers H.264 and AAC/M4A streams to avoid unnecessary transcoding.
+- Falls back to FFmpeg conversion only when compatible streams are unavailable.
+- Displays title, progress, speed, and estimated time.
+- Supports resumable downloads and optional Chrome-session authentication with explicit consent.
+
+## Requirements
+
+- Node.js 22+
+- `yt-dlp` available on `PATH`
+
+```sh
+brew install yt-dlp
+npm install
+npm link
+ytdown
+```
+
+Downloads are written to `./downloads`. The CLI currently handles one video per run and offers 720p or 1080p limits; it never upscales the source.
+
+## Architecture
+
+```text
+src/
+├── cli/    # interaction, presentation, and process lifecycle
+├── core/   # validation and pure domain rules
+└── infra/  # filesystem and yt-dlp process integration
+```
+
+## Quality checks
+
+```sh
+npm run check
+npm test
+```
+
+The project uses Biome, ESLint, Node.js' native test runner, a pre-commit hook, and GitHub Actions. Download only content you are authorized to use and respect applicable terms and copyright law.
