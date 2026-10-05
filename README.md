@@ -180,8 +180,6 @@ autorais, termos do serviço e leis aplicáveis.
 
 # yt-dlp-cli-nodejs
 
----
-
 An interactive Node.js CLI that downloads videos supported by [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) and produces editor-friendly MP4 files.
 
 ## Highlights
