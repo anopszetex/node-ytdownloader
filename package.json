@@ -16,7 +16,6 @@
   ],
   "scripts": {
     "start": "node src/index.js",
-    "performance": "node scripts/performance.js",
     "check": "biome check . && eslint src test scripts fixtures",
     "check:fix": "biome check --write . && eslint src test scripts fixtures",
     "format": "biome format --write .",

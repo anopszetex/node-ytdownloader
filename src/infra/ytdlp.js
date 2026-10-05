@@ -172,14 +172,15 @@ export function buildYtdlpArgs(config, options = {}) {
 /**
  * @param {import('node:child_process').ChildProcess} child
  * @param {NodeJS.Signals} signal
+ * @param {boolean} [force]
  */
-function terminateProcessTree(child, signal) {
+function terminateProcessTree(child, signal, force = false) {
   if (!child.pid) {
     return;
   }
 
   if (process.platform === "win32") {
-    terminateWindowsProcessTree(child, false);
+    terminateWindowsProcessTree(child, force);
     return;
   }
 
@@ -220,16 +221,7 @@ function terminateWindowsProcessTree(child, force) {
 
 /** @param {import('node:child_process').ChildProcess} child */
 function forceTerminateProcessTree(child) {
-  if (!child.pid) {
-    return;
-  }
-
-  if (process.platform !== "win32") {
-    terminateProcessTree(child, "SIGKILL");
-    return;
-  }
-
-  terminateWindowsProcessTree(child, true);
+  terminateProcessTree(child, "SIGKILL", true);
 }
 
 /**

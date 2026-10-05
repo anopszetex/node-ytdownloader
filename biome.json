@@ -1,16 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
   "files": {
-    "includes": [
-      "**",
-      "!node_modules",
-      "!downloads",
-      "!src/example-seguir.js",
-      "!src/index2.js",
-      "!src/index3.js",
-      "!src/index4.mjs",
-      "!src/index5.js"
-    ]
+    "includes": ["**", "!node_modules", "!downloads"]
   },
   "formatter": {
     "enabled": true,

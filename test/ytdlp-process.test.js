@@ -8,25 +8,23 @@ import { download } from "../src/infra/ytdlp.js";
 
 const executable = fileURLToPath(new URL("../fixtures/fake-ytdlp.js", import.meta.url));
 
-async function createTestConfig(url) {
+async function createTestConfig(context, url) {
   const outputDirectory = await mkdtemp(path.join(os.tmpdir(), "ytdown-"));
 
+  context.after(() => rm(outputDirectory, { recursive: true, force: true }));
+
   return {
-    config: {
-      url,
-      outputDirectory,
-      quality: 1080,
-    },
-    dispose: () => rm(outputDirectory, { recursive: true, force: true }),
+    url,
+    outputDirectory,
+    quality: 1080,
   };
 }
 
 describe("processo de download", () => {
   it("entrega eventos estruturados do processo filho", async (context) => {
-    const { config, dispose } = await createTestConfig("https://example.com/success");
+    const config = await createTestConfig(context, "https://example.com/success");
     const events = [];
 
-    context.after(dispose);
     await download(config, { executable, onEvent: (event) => events.push(event) });
 
     assert.deepEqual(
@@ -36,10 +34,9 @@ describe("processo de download", () => {
   });
 
   it("tenta converter somente quando formatos compatíveis estão indisponíveis", async (context) => {
-    const { config, dispose } = await createTestConfig("https://example.com/fallback");
+    const config = await createTestConfig(context, "https://example.com/fallback");
     const events = [];
 
-    context.after(dispose);
     await download(config, { executable, onEvent: (event) => events.push(event) });
 
     assert.deepEqual(
@@ -49,10 +46,9 @@ describe("processo de download", () => {
   });
 
   it("não repete falhas sem relação com o formato", async (context) => {
-    const { config, dispose } = await createTestConfig("https://example.com/fail");
+    const config = await createTestConfig(context, "https://example.com/fail");
     const events = [];
 
-    context.after(dispose);
     await assert.rejects(download(config, { executable, onEvent: (event) => events.push(event) }), {
       code: "RATE_LIMIT",
     });
@@ -60,11 +56,10 @@ describe("processo de download", () => {
   });
 
   it("repete com o navegador autorizado pelo usuário", async (context) => {
-    const { config, dispose } = await createTestConfig("https://example.com/auth");
+    const config = await createTestConfig(context, "https://example.com/auth");
     const events = [];
     let authenticationRequests = 0;
 
-    context.after(dispose);
     await download(config, {
       executable,
       onAuthenticationRequired: async () => {
@@ -82,10 +77,9 @@ describe("processo de download", () => {
   });
 
   it("não repete a autenticação sem consentimento", async (context) => {
-    const { config, dispose } = await createTestConfig("https://example.com/auth");
+    const config = await createTestConfig(context, "https://example.com/auth");
     const events = [];
 
-    context.after(dispose);
     await assert.rejects(
       download(config, {
         executable,
@@ -98,10 +92,8 @@ describe("processo de download", () => {
   });
 
   it("encerra um processo filho ativo quando cancelado", async (context) => {
-    const { config, dispose } = await createTestConfig("https://example.com/wait");
+    const config = await createTestConfig(context, "https://example.com/wait");
     const controller = new AbortController();
-
-    context.after(dispose);
 
     const result = download(config, {
       executable,
@@ -118,10 +110,8 @@ describe("processo de download", () => {
   });
 
   it("força o encerramento quando o processo ignora o primeiro sinal", async (context) => {
-    const { config, dispose } = await createTestConfig("https://example.com/ignore-termination");
+    const config = await createTestConfig(context, "https://example.com/ignore-termination");
     const controller = new AbortController();
-
-    context.after(dispose);
 
     const result = download(config, {
       executable,

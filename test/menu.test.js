@@ -7,11 +7,13 @@ function createMenuInput(lines) {
   const output = new PassThrough();
   const chunks = [];
   const answers = [...lines];
+  const controller = new AbortController();
 
   output.on("data", (chunk) => chunks.push(chunk));
 
   return {
     output,
+    signal: controller.signal,
     question: async () => answers.shift() ?? "",
     text: () => Buffer.concat(chunks).toString("utf8"),
   };
@@ -20,9 +22,8 @@ function createMenuInput(lines) {
 describe("menu de download", () => {
   it("coleta um download confirmado", async () => {
     const terminal = createMenuInput(["https://example.com/video", "1", ""]);
-    const controller = new AbortController();
 
-    const input = await openDownloadMenu({ ...terminal, signal: controller.signal });
+    const input = await openDownloadMenu(terminal);
 
     assert.deepEqual(input, {
       url: "https://example.com/video",
@@ -33,9 +34,8 @@ describe("menu de download", () => {
 
   it("repete as perguntas de URL e qualidade inválidas", async () => {
     const terminal = createMenuInput(["not-a-url", "https://example.com/video", "9", "2", "sim"]);
-    const controller = new AbortController();
 
-    const input = await openDownloadMenu({ ...terminal, signal: controller.signal });
+    const input = await openDownloadMenu(terminal);
 
     assert.equal(input.quality, 720);
     assert.match(terminal.text(), /URL deve ser válida/);
@@ -44,9 +44,8 @@ describe("menu de download", () => {
 
   it("não retorna uma entrada quando o usuário recusa", async () => {
     const terminal = createMenuInput(["https://example.com/video", "1", "n"]);
-    const controller = new AbortController();
 
-    const input = await openDownloadMenu({ ...terminal, signal: controller.signal });
+    const input = await openDownloadMenu(terminal);
 
     assert.equal(input, undefined);
   });
@@ -55,12 +54,8 @@ describe("menu de download", () => {
 describe("confirmação de autenticação do Chrome", () => {
   it("solicita consentimento e valida a escolha", async () => {
     const terminal = createMenuInput(["invalid", "1"]);
-    const controller = new AbortController();
 
-    const confirmed = await confirmChromeAuthentication({
-      ...terminal,
-      signal: controller.signal,
-    });
+    const confirmed = await confirmChromeAuthentication(terminal);
 
     assert.equal(confirmed, true);
     assert.match(terminal.text(), /sessão do Chrome/);
@@ -69,12 +64,8 @@ describe("confirmação de autenticação do Chrome", () => {
 
   it("respeita a recusa de autenticação", async () => {
     const terminal = createMenuInput(["2"]);
-    const controller = new AbortController();
 
-    const confirmed = await confirmChromeAuthentication({
-      ...terminal,
-      signal: controller.signal,
-    });
+    const confirmed = await confirmChromeAuthentication(terminal);
 
     assert.equal(confirmed, false);
   });
